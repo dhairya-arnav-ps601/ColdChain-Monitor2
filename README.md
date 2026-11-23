@@ -4,12 +4,16 @@
 [![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
 [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![Bootstrap 5](https://img.shields.io/badge/Bootstrap_5-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
+[![Vercel Live](https://img.shields.io/badge/Vercel-Live%20Demo-black?style=for-the-badge&logo=vercel)](https://coldchain-monitor2.vercel.app)
 [![Chart.js](https://img.shields.io/badge/Chart.js-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)](https://www.chartjs.org/)
 [![GxP Ready](https://img.shields.io/badge/GxP%20Compliance-Architecture-success?style=for-the-badge&logo=shield)](https://www.who.int/)
 
 > **Applied AI Frontend Development Basics | OJT Capstone Project V2.0**  
 > *Polaris School of Technology Bangalore*  
 > Mentored under **Kshitij Sir** | Engineered by **Arnav Pratap Singh**
+
+> ?? **Live Production Vercel URL:** [https://coldchain-monitor2.vercel.app](https://coldchain-monitor2.vercel.app)
+
 
 ---
 
