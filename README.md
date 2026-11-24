@@ -43,11 +43,14 @@ The V2.0 redesign replaces generic layouts with a bespoke CRM dashboard aestheti
 
 ## 🌟 Key Modules & Capabilities
 
-### 1. 🔐 Split-Screen Authentication Experience & Google Workspace SSO
-* **Enterprise Split-Screen Layout:** Left-side navy brand panel highlighting thermal compliance metrics; right-side clean authentication card.
-* **Google Workspace SSO:** One-click Google Sign-In supporting `Arnav Pratap Singh (Logistics Manager)` and `Sourabh (Warehouse Operator)` with verified corporate credentials.
-* **Standard Credential Access:** Direct username/password sign-in (`Arnav` / `Sourabh`, password: `123`).
-* **Password Visibility Toggle:** Show/hide password button with validation and accessible feedback.
+### 1. 🔐 Google OAuth 2.0 ("Continue with Google") & Dynamic Role Onboarding
+* **Google Identity Services (GIS) Web SDK:** Native integration with Google's official OAuth 2.0 library (`https://accounts.google.com/gsi/client`) providing standard "Continue with Google" sign-in, JWT credential exchange, and automated profile image/name synchronization.
+* **Pre-Configured Personnel Routing:**
+  * `dhairyaps2009@gmail.com` ➔ Automatically assigned **Logistics Manager** role with Command Center fleet authority.
+  * `sourabhjeevan0794@gmail.com` ➔ Automatically assigned **Warehouse Operator** role with Depot Bay inspection authority.
+  * `arnavpratap60@gmail.com` ➔ Pre-authorized **Logistics Manager** backup.
+* **Dynamic Role Onboarding:** When a new Google account signs in for the first time, an interactive onboarding dialog asks for their operational mandate (**Logistics Manager** or **Warehouse Operator**), dynamically tailoring their console workspace, navigation privileges, and audit permissions.
+* **Session Persistence & Secure Logout:** User session stored safely in `localStorage["cc_user"]`; logging out clears session credentials and disables Google auto-select.
 
 ### 2. 📊 Executive Overview Dashboard & Dark Mode
 * **Operational Header:** Contextual dispatcher greeting, station location, live date, and one-click **Light/Dark Mode** toggle.
@@ -96,16 +99,17 @@ The V2.0 redesign replaces generic layouts with a bespoke CRM dashboard aestheti
 
 ---
 
-## 🔑 Demo Credentials
+## 🔑 Operational Google Accounts
 
-Test the application immediately using the pre-configured accounts:
+Authenticate immediately using the pre-configured accounts:
 
-| Role | Username | Password | Full Name | Operational Mandate |
-|---|---|---|---|---|
-| **Logistics Manager** | `Arnav` | `123` | Arnav Pratap Singh | Fleet oversight, route dispatch, emergency temperature regulation & security deletion |
-| **Warehouse Operator** | `Sourabh` | `123` | Sourabh | Depot receiving, physical cargo inspection, alert dispatch & cancellation sign-off |
+| Role | Google Email | Display Name | Operational Mandate |
+|---|---|---|---|
+| **Logistics Manager** | `dhairyaps2009@gmail.com` | Dhairya | Fleet oversight, route dispatch, emergency temperature regulation & security deletion |
+| **Warehouse Operator** | `sourabhjeevan0794@gmail.com` | Sourabh Jeevan | Depot receiving, physical cargo inspection, alert dispatch & cancellation sign-off |
+| **Logistics Manager (Alt)** | `arnavpratap60@gmail.com` | Arnav Pratap Singh | Auxiliary fleet command & supervisor sign-off |
 
-*(Tip: You can also use the **"Sign in with Google"** button on the login screen to sign in with either account with a single click.)*
+*(Any other Google account that signs in will be prompted to select their operational mandate and receive their customized workspace).*
 
 ---
 
@@ -115,7 +119,8 @@ Test the application immediately using the pre-configured accounts:
 ColdChain-Monitor2/
 ├── index.html                                        # Main V2.0 SPA entrypoint & semantic HTML5 layout
 ├── style.css                                         # Design system tokens, CRM sidebar & responsive styles
-├── script.js                                         # Master controller, Chart.js engine, RBAC & persistence
+├── script.js                                         # Master controller, Google OAuth 2.0 & Chart.js engine
+├── .env.example                                      # Google OAuth 2.0 Client ID template & redirect URIs
 ├── README.md                                         # Project documentation & operational manual
 └── docs/                                             # PDF guides, presentations, PRD & V2 Playbook
     ├── 1_ColdChain_HTML_Explained_English.pdf

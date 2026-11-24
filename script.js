@@ -7,14 +7,47 @@
  * ===================================================================
  */
 
-// 1. Authorized User Accounts & Personas
+// 1. Authorized User Accounts & Google OAuth Configuration
+const GOOGLE_CLIENT_ID = window.GOOGLE_CLIENT_ID || "330845958-coldchain-monitor.apps.googleusercontent.com";
+
 const USERS = [
-  { username: "Arnav", pass: "123", name: "Arnav Pratap Singh", role: "Logistics Manager", email: "arnavpratap60@gmail.com" },
-  { username: "Sourabh", pass: "123", name: "Sourabh Verma", role: "Warehouse Operator", email: "sourabh@coldchain.io" }
+  { username: "Dhairya", name: "Dhairya", role: "Logistics Manager", email: "dhairyaps2009@gmail.com" },
+  { username: "Sourabh", name: "Sourabh Jeevan", role: "Warehouse Operator", email: "sourabhjeevan0794@gmail.com" },
+  { username: "Arnav", name: "Arnav Pratap Singh", role: "Logistics Manager", email: "arnavpratap60@gmail.com" }
 ];
+
+// Pre-Mapped Operational Roles by Normalized Google Email Address
+const PREMAPPED_ROLES = {
+  "dhairyaps2009@gmail.com": { name: "Dhairya", role: "Logistics Manager", station: "Bengaluru Command Center (HQ)" },
+  "sourabhjeevan0794@gmail.com": { name: "Sourabh Jeevan", role: "Warehouse Operator", station: "Bengaluru Depot Terminal (Bay 4B)" },
+  "arnavpratap60@gmail.com": { name: "Arnav Pratap Singh", role: "Logistics Manager", station: "Polaris School of Technology Bangalore (Command HQ)" },
+  "sourabh@coldchain.io": { name: "Sourabh Verma", role: "Warehouse Operator", station: "Polaris School of Technology Bangalore (Depot 4B)" }
+};
 
 // 2. Individual Profile Metadata (Default Templates)
 const DEFAULT_PROFILES = {
+  dhairyaps2009: {
+    username: "Dhairya",
+    name: "Dhairya",
+    role: "Logistics Manager",
+    badgeClass: "bg-primary",
+    email: "dhairyaps2009@gmail.com",
+    phone: "+91 98765 43210",
+    station: "Bengaluru Command Center (HQ)",
+    duty: "Fleet oversight, route dispatch, thermal regulation & incident authorization",
+    photo: ""
+  },
+  sourabhjeevan0794: {
+    username: "Sourabh",
+    name: "Sourabh Jeevan",
+    role: "Warehouse Operator",
+    badgeClass: "bg-teal text-white",
+    email: "sourabhjeevan0794@gmail.com",
+    phone: "+91 98765 43211",
+    station: "Bengaluru Depot Terminal (Bay 4B)",
+    duty: "In-bound receiving, physical seal inspection, alert acknowledgement & cancellation decisions",
+    photo: ""
+  },
   Arnav: {
     username: "Arnav",
     name: "Arnav Pratap Singh",
@@ -24,17 +57,6 @@ const DEFAULT_PROFILES = {
     phone: "852 8600 376",
     station: "Polaris School of Technology Bangalore (Command HQ)",
     duty: "Fleet oversight, route dispatch, thermal regulation & incident authorization",
-    photo: ""
-  },
-  Sourabh: {
-    username: "Sourabh",
-    name: "Sourabh Verma",
-    role: "Warehouse Operator",
-    badgeClass: "bg-teal text-white",
-    email: "sourabh@coldchain.io",
-    phone: "70195 885 90",
-    station: "Polaris School of Technology Bangalore (Depot 4B)",
-    duty: "In-bound receiving, physical seal inspection, alert acknowledgement & cancellation decisions",
     photo: ""
   }
 };
@@ -579,9 +601,12 @@ function loadUser() {
     const saved = localStorage.getItem("cc_user");
     if (!saved) return null;
     const parsed = JSON.parse(saved);
+    if (parsed && typeof parsed === "object" && parsed.email) {
+      return parsed;
+    }
     const targetName = typeof parsed === "string" ? parsed : (parsed && parsed.username ? parsed.username : null);
     if (!targetName) return null;
-    return USERS.find(u => u.username.toLowerCase() === targetName.toLowerCase()) || null;
+    return USERS.find(u => u.username.toLowerCase() === targetName.toLowerCase() || (u.email && u.email.toLowerCase() === targetName.toLowerCase())) || null;
   } catch (err) {
     return null;
   }
@@ -593,7 +618,7 @@ function saveState() {
     localStorage.setItem("cc_alerts", JSON.stringify(alerts));
     localStorage.setItem("cc_cancellations", JSON.stringify(cancellations));
     localStorage.setItem("cc_manager_notifications", JSON.stringify(managerNotifications));
-    localStorage.setItem("cc_user", JSON.stringify(currentUser ? currentUser.username : null));
+    localStorage.setItem("cc_user", JSON.stringify(currentUser || null));
     localStorage.setItem("cc_profiles", JSON.stringify(PROFILES));
     localStorage.setItem("cc_theme", currentTheme);
     localStorage.setItem("cc_storage_ver", STORAGE_VER);
@@ -712,29 +737,39 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ---------- Authentication State & Profiles ---------- */
+  function getUserProfile(user = currentUser) {
+    if (!user) return null;
+    const emailKey = (user.email || "").toLowerCase();
+    const userKey = (user.username || "").toLowerCase();
+    return PROFILES[emailKey] || PROFILES[userKey] || DEFAULT_PROFILES[user.username] || DEFAULT_PROFILES.dhairyaps2009 || {
+      username: user.username || "User",
+      name: user.name || "Operations Officer",
+      role: user.role || "Logistics Manager",
+      badgeClass: user.role === "Logistics Manager" ? "bg-primary" : "bg-teal text-white",
+      email: user.email || "",
+      phone: "+91 98765 00000",
+      station: user.role === "Logistics Manager" ? "Bengaluru Command Center (HQ)" : "Bengaluru Depot Terminal (Bay 4B)",
+      duty: "Cold-chain supervision & GxP governance",
+      photo: user.avatar || ""
+    };
+  }
+
   function updateProfileUI() {
     if (!currentUser) return;
-    const prof = PROFILES[currentUser.username] || DEFAULT_PROFILES[currentUser.username] || {
-      name: currentUser.name,
-      role: currentUser.role,
-      email: currentUser.email,
-      phone: "—",
-      station: "Polaris School of Technology Bangalore",
-      duty: "Cold-chain supervision",
-      photo: ""
-    };
+    const prof = getUserProfile(currentUser);
 
     $("navUserName").textContent = prof.name;
-    $("welcomeUserName").textContent = prof.name.split(" ")[0];
+    $("welcomeUserName").textContent = (prof.name || "Officer").split(" ")[0];
     $("userRoleBadge").textContent = prof.role;
 
     // Render avatar: photo image or initial circle
     const avatarContainer = $("sidebarAvatarContainer");
     if (avatarContainer) {
-      if (prof.photo) {
-        avatarContainer.innerHTML = `<img src="${prof.photo}" alt="${esc(prof.name)}" class="profile-avatar-img">`;
+      const avatarSrc = prof.photo || currentUser.avatar;
+      if (avatarSrc) {
+        avatarContainer.innerHTML = `<img src="${avatarSrc}" alt="${esc(prof.name)}" class="profile-avatar-img">`;
       } else {
-        avatarContainer.innerHTML = `<span id="sidebarAvatarInitial">${prof.name.charAt(0).toUpperCase()}</span>`;
+        avatarContainer.innerHTML = `<span id="sidebarAvatarInitial">${(prof.name || "U").charAt(0).toUpperCase()}</span>`;
       }
     }
   }
@@ -757,57 +792,225 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       $("loginSection").classList.remove("d-none");
       $("appSection").classList.add("d-none");
-      $("loginUsername").value = "";
-      $("loginPassword").value = "";
-      $("loginError").classList.add("d-none");
+      try {
+        if (window.google && window.google.accounts && window.google.accounts.id) {
+          window.google.accounts.id.disableAutoSelect();
+        }
+      } catch (err) {
+        console.warn("Google auto-select disable note:", err);
+      }
     }
   }
 
-  function tryLogin(inputUser, inputPass) {
-    const cleanU = (inputUser || "").trim().toLowerCase();
-    const cleanP = (inputPass || "").trim();
+  /* ---------- Google OAuth 2.0 & Role Onboarding Engine ---------- */
+  let pendingOnboardingUser = null;
 
-    if (!cleanU || !cleanP) {
-      $("loginError").classList.remove("d-none");
+  function parseJwt(token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      console.warn("JWT parse exception:", e);
+      return null;
+    }
+  }
+
+  function handleGoogleLogin(email, name, photoUrl) {
+    const normEmail = (email || "").trim().toLowerCase();
+    if (!normEmail) return;
+
+    // 1. Check pre-mapped operational roles
+    if (PREMAPPED_ROLES[normEmail]) {
+      const mapped = PREMAPPED_ROLES[normEmail];
+      const userObj = {
+        username: mapped.name.replace(/\s+/g, ""),
+        name: name || mapped.name,
+        role: mapped.role,
+        email: normEmail,
+        avatar: photoUrl || ""
+      };
+      if (!PROFILES[normEmail]) {
+        PROFILES[normEmail] = {
+          username: userObj.username,
+          name: userObj.name,
+          role: userObj.role,
+          badgeClass: userObj.role === "Logistics Manager" ? "bg-primary" : "bg-teal text-white",
+          email: normEmail,
+          phone: "+91 98765 43210",
+          station: mapped.station,
+          duty: userObj.role === "Logistics Manager" ? "Fleet oversight, route dispatch & thermal regulation" : "In-bound receiving & physical inspection",
+          photo: photoUrl || ""
+        };
+      }
+      setAuth(userObj);
       return;
     }
 
-    const found = USERS.find(u => u.username.toLowerCase() === cleanU && u.pass === cleanP);
-    if (found) {
-      $("loginError").classList.add("d-none");
-      setAuth(found);
+    // 2. Check if this email already registered previously
+    if (PROFILES[normEmail] && PROFILES[normEmail].role) {
+      const savedProf = PROFILES[normEmail];
+      const userObj = {
+        username: savedProf.username || (name || normEmail.split("@")[0]).replace(/\s+/g, ""),
+        name: name || savedProf.name,
+        role: savedProf.role,
+        email: normEmail,
+        avatar: photoUrl || savedProf.photo || ""
+      };
+      setAuth(userObj);
+      return;
+    }
+
+    // 3. New Google Account -> Trigger Role Onboarding Dialog
+    pendingOnboardingUser = {
+      email: normEmail,
+      name: name || normEmail.split("@")[0],
+      photo: photoUrl || ""
+    };
+
+    $("onboardingUserName").textContent = pendingOnboardingUser.name;
+    $("onboardingUserEmail").textContent = pendingOnboardingUser.email;
+    const avatarEl = $("onboardingUserAvatar");
+    if (photoUrl) {
+      avatarEl.innerHTML = `<img src="${photoUrl}" alt="${esc(pendingOnboardingUser.name)}" class="w-100 h-100 rounded-circle" style="object-fit: cover;">`;
     } else {
-      $("loginError").classList.remove("d-none");
+      avatarEl.textContent = (pendingOnboardingUser.name || "U").charAt(0).toUpperCase();
+    }
+
+    openModal("roleSelectionModal");
+  }
+
+  function handleOnboardingComplete(selectedRole) {
+    if (!pendingOnboardingUser) return;
+    const normEmail = pendingOnboardingUser.email;
+    const userObj = {
+      username: pendingOnboardingUser.name.replace(/\s+/g, ""),
+      name: pendingOnboardingUser.name,
+      role: selectedRole,
+      email: normEmail,
+      avatar: pendingOnboardingUser.photo || ""
+    };
+
+    PROFILES[normEmail] = {
+      username: userObj.username,
+      name: userObj.name,
+      role: userObj.role,
+      badgeClass: selectedRole === "Logistics Manager" ? "bg-primary" : "bg-teal text-white",
+      email: normEmail,
+      phone: "+91 98765 00000",
+      station: selectedRole === "Logistics Manager" ? "Bengaluru Command Center (HQ)" : "Bengaluru Depot Terminal (Bay 4B)",
+      duty: selectedRole === "Logistics Manager" ? "Fleet oversight, route dispatch & thermal regulation" : "In-bound receiving & physical inspection",
+      photo: userObj.avatar
+    };
+
+    closeModal("roleSelectionModal");
+    pendingOnboardingUser = null;
+    setAuth(userObj);
+  }
+
+  // Role Selection Options
+  $("optSelectLogisticsManager").onclick = () => handleOnboardingComplete("Logistics Manager");
+  $("optSelectWarehouseOperator").onclick = () => handleOnboardingComplete("Warehouse Operator");
+  $("btnCancelOnboarding").onclick = () => {
+    closeModal("roleSelectionModal");
+    pendingOnboardingUser = null;
+  };
+
+  // Google GIS Token Callback
+  function handleGoogleCredentialResponse(response) {
+    if (!response || !response.credential) return;
+    const payload = parseJwt(response.credential);
+    if (payload && payload.email) {
+      handleGoogleLogin(payload.email, payload.name, payload.picture);
     }
   }
 
-  // Google Login SSO Integration (Requirement 1)
-  $("btnGoogleLogin").onclick = () => {
+  // Initialize Google Identity Services (GIS)
+  function initGoogleAuth() {
+    if (window.google && window.google.accounts && window.google.accounts.id) {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true
+        });
+
+        const btnContainer = $("googleButtonContainer");
+        if (btnContainer) {
+          window.google.accounts.id.renderButton(btnContainer, {
+            theme: document.documentElement.getAttribute("data-theme") === "dark" ? "filled_black" : "outline",
+            size: "large",
+            type: "standard",
+            text: "continue_with",
+            shape: "rectangular",
+            logo_alignment: "left",
+            width: 320
+          });
+        }
+      } catch (e) {
+        console.warn("GIS initialization notice:", e);
+      }
+    }
+  }
+
+  initGoogleAuth();
+  window.addEventListener("load", initGoogleAuth);
+
+  // Button Listeners for Google Sign-In
+  $("btnContinueWithGoogle").onclick = () => {
+    if (window.google && window.google.accounts && window.google.accounts.id) {
+      try { window.google.accounts.id.prompt(); } catch (err) {}
+    }
     openModal("googleLoginModal");
   };
 
-  $("googleAccountArnav").onclick = () => {
+  $("quickAccountDhairya").onclick = () => {
+    handleGoogleLogin("dhairyaps2009@gmail.com", "Dhairya", "");
+  };
+
+  $("quickAccountSourabh").onclick = () => {
+    handleGoogleLogin("sourabhjeevan0794@gmail.com", "Sourabh Jeevan", "");
+  };
+
+  $("btnCustomGoogleEmail").onclick = () => {
+    openModal("customEmailLoginModal");
+  };
+
+  $("googleAccountDhairya").onclick = () => {
     closeModal("googleLoginModal");
-    setAuth(USERS[0]); // Arnav
+    handleGoogleLogin("dhairyaps2009@gmail.com", "Dhairya", "");
   };
 
   $("googleAccountSourabh").onclick = () => {
     closeModal("googleLoginModal");
-    setAuth(USERS[1]); // Sourabh
+    handleGoogleLogin("sourabhjeevan0794@gmail.com", "Sourabh Jeevan", "");
   };
 
-  // Password visibility toggle
-  $("togglePassword").onclick = () => {
-    const input = $("loginPassword");
-    const isPass = input.type === "password";
-    input.type = isPass ? "text" : "password";
-    $("togglePasswordIcon").className = isPass ? "bi bi-eye-slash me-1" : "bi bi-eye me-1";
-    $("togglePasswordText").textContent = isPass ? "Hide" : "Show";
+  $("googleAccountArnav").onclick = () => {
+    closeModal("googleLoginModal");
+    handleGoogleLogin("arnavpratap60@gmail.com", "Arnav Pratap Singh", "");
   };
 
-  $("loginForm").onsubmit = (e) => {
+  $("btnModalUseAnotherGoogle").onclick = () => {
+    closeModal("googleLoginModal");
+    openModal("customEmailLoginModal");
+  };
+
+  $("customEmailLoginForm").onsubmit = (e) => {
     e.preventDefault();
-    tryLogin($("loginUsername").value, $("loginPassword").value);
+    const email = $("customGoogleEmailInput").value.trim();
+    const name = $("customGoogleNameInput").value.trim();
+    if (!email || !email.includes("@")) {
+      $("customEmailError").classList.remove("d-none");
+      return;
+    }
+    $("customEmailError").classList.add("d-none");
+    closeModal("customEmailLoginModal");
+    handleGoogleLogin(email, name, "");
   };
 
   $("btnLogout").onclick = () => setAuth(null);
@@ -828,10 +1031,10 @@ document.addEventListener("DOMContentLoaded", () => {
     overlay.classList.remove("active");
   };
 
-  /* ---------- Responsive Editable Profile Management (Requirement 2) ---------- */
+  /* ---------- Responsive Editable Profile Management ---------- */
   function openUserProfileModal() {
     if (!currentUser) return;
-    const prof = PROFILES[currentUser.username] || DEFAULT_PROFILES[currentUser.username];
+    const prof = getUserProfile(currentUser);
 
     $("profModalName").textContent = prof.name;
     $("profModalRole").textContent = prof.role;
@@ -840,14 +1043,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // Set Avatar in Modal
     const modalAvatar = $("modalProfileAvatar");
     if (modalAvatar) {
-      modalAvatar.src = prof.photo || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(prof.name)}`;
+      modalAvatar.src = prof.photo || currentUser.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(prof.name)}`;
     }
 
     const detailsList = $("profModalDetailsList");
     if (detailsList) {
       detailsList.innerHTML = `
-        <dt class="col-4 text-secondary fw-semibold mb-2">Email</dt>
-        <dd class="col-8 mb-2 text-dark font-monospace">${esc(prof.email || "—")}</dd>
+        <dt class="col-4 text-secondary fw-semibold mb-2">Google Email</dt>
+        <dd class="col-8 mb-2 text-dark font-monospace">${esc(prof.email || currentUser.email || "—")}</dd>
         <dt class="col-4 text-secondary fw-semibold mb-2">Phone</dt>
         <dd class="col-8 mb-2 text-dark font-monospace">${esc(prof.phone || "—")}</dd>
         <dt class="col-4 text-secondary fw-semibold mb-2">Station / Hub</dt>
@@ -866,12 +1069,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Toggle edit profile mode inside modal
   $("btnToggleProfileEdit").onclick = () => {
-    const prof = PROFILES[currentUser.username] || DEFAULT_PROFILES[currentUser.username];
+    const prof = getUserProfile(currentUser);
     $("modalEditName").value = prof.name;
-    $("modalEditEmail").value = prof.email;
+    $("modalEditEmail").value = prof.email || currentUser.email;
     $("modalEditPhone").value = prof.phone || "";
     $("modalEditStation").value = prof.station || "";
-    $("modalEditAvatarPreview").src = prof.photo || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(prof.name)}`;
+    $("modalEditAvatarPreview").src = prof.photo || currentUser.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(prof.name)}`;
 
     $("profileViewMode").classList.add("d-none");
     $("modalProfileEditForm").classList.remove("d-none");
@@ -883,15 +1086,20 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Photo upload handling (FileReader to base64)
-  function handlePhotoUpload(fileInput, previewImgElement, targetUsername) {
+  function handlePhotoUpload(fileInput, previewImgElement, targetUser) {
     const file = fileInput.files && fileInput.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
         const dataUrl = e.target.result;
         previewImgElement.src = dataUrl;
-        if (PROFILES[targetUsername]) {
-          PROFILES[targetUsername].photo = dataUrl;
+        if (currentUser) {
+          currentUser.avatar = dataUrl;
+          const key = (currentUser.email || currentUser.username || "").toLowerCase();
+          const prof = getUserProfile(currentUser);
+          prof.photo = dataUrl;
+          PROFILES[key] = prof;
+          PROFILES[currentUser.username] = prof;
           saveState();
           updateProfileUI();
         }
@@ -901,11 +1109,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   $("modalPhotoUpload").onchange = (e) => {
-    if (currentUser) handlePhotoUpload(e.target, $("modalEditAvatarPreview"), currentUser.username);
+    if (currentUser) handlePhotoUpload(e.target, $("modalEditAvatarPreview"), currentUser);
   };
 
   $("settingsPhotoUpload").onchange = (e) => {
-    if (currentUser) handlePhotoUpload(e.target, $("settingsAvatarPreview"), currentUser.username);
+    if (currentUser) handlePhotoUpload(e.target, $("settingsAvatarPreview"), currentUser);
   };
 
   // Save profile from Modal
@@ -913,7 +1121,7 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     if (!currentUser) return;
 
-    const prof = PROFILES[currentUser.username] || { ...DEFAULT_PROFILES[currentUser.username] };
+    const prof = getUserProfile(currentUser);
     prof.name = $("modalEditName").value.trim();
     prof.email = $("modalEditEmail").value.trim();
     prof.phone = $("modalEditPhone").value.trim();
@@ -921,6 +1129,8 @@ document.addEventListener("DOMContentLoaded", () => {
     currentUser.name = prof.name;
     currentUser.email = prof.email;
 
+    const key = (currentUser.email || currentUser.username || "").toLowerCase();
+    PROFILES[key] = prof;
     PROFILES[currentUser.username] = prof;
     saveState();
     updateProfileUI();
@@ -932,7 +1142,7 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     if (!currentUser) return;
 
-    const prof = PROFILES[currentUser.username] || { ...DEFAULT_PROFILES[currentUser.username] };
+    const prof = getUserProfile(currentUser);
     prof.name = $("settingsNameInput").value.trim();
     prof.email = $("settingsEmailInput").value.trim();
     prof.phone = $("settingsPhoneInput").value.trim();
@@ -941,6 +1151,8 @@ document.addEventListener("DOMContentLoaded", () => {
     currentUser.name = prof.name;
     currentUser.email = prof.email;
 
+    const key = (currentUser.email || currentUser.username || "").toLowerCase();
+    PROFILES[key] = prof;
     PROFILES[currentUser.username] = prof;
     saveState();
     updateProfileUI();
@@ -1896,15 +2108,15 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ---------- Settings & Profile View (Requirement 2) ---------- */
   function renderSettings() {
     if (!currentUser) return;
-    const prof = PROFILES[currentUser.username] || DEFAULT_PROFILES[currentUser.username];
+    const prof = getUserProfile(currentUser);
 
     if ($("settingsNameInput")) $("settingsNameInput").value = prof.name;
-    if ($("settingsEmailInput")) $("settingsEmailInput").value = prof.email;
+    if ($("settingsEmailInput")) $("settingsEmailInput").value = prof.email || currentUser.email || "";
     if ($("settingsPhoneInput")) $("settingsPhoneInput").value = prof.phone || "";
     if ($("settingsStationInput")) $("settingsStationInput").value = prof.station || "";
     if ($("settingsDutyInput")) $("settingsDutyInput").value = prof.duty || "";
     if ($("settingsAvatarPreview")) {
-      $("settingsAvatarPreview").src = prof.photo || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(prof.name)}`;
+      $("settingsAvatarPreview").src = prof.photo || currentUser.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(prof.name)}`;
     }
   }
 
@@ -2161,27 +2373,23 @@ document.addEventListener("DOMContentLoaded", () => {
   window.promptDeleteShipment = (id) => {
     pendingDeleteShipmentId = id;
     $("deleteTargetShipmentId").textContent = id;
-    $("deleteAuthUserId").value = currentUser ? currentUser.username : "";
-    $("deleteAuthPassword").value = "";
+    $("deleteAuthConfirmEmail").value = "";
     $("deleteAuthError").classList.add("d-none");
     openModal("deleteAuthModal");
   };
 
   $("deleteAuthForm").onsubmit = (e) => {
     e.preventDefault();
-    const inputUser = $("deleteAuthUserId").value.trim().toLowerCase();
-    const inputPass = $("deleteAuthPassword").value.trim();
+    const inputEmail = ($("deleteAuthConfirmEmail").value || "").trim().toLowerCase();
 
-    const matchedUser = USERS.find(u => u.username.toLowerCase() === inputUser && u.pass === inputPass);
-
-    if (!matchedUser) {
-      $("deleteAuthError").textContent = "Invalid User ID or Password. Deletion denied.";
+    if (!currentUser || currentUser.role !== "Logistics Manager") {
+      $("deleteAuthError").textContent = "Access denied: Only active Logistics Managers are authorized to delete consignments.";
       $("deleteAuthError").classList.remove("d-none");
       return;
     }
 
-    if (matchedUser.role !== "Logistics Manager") {
-      $("deleteAuthError").textContent = "Access denied: Only Logistics Managers are authorized to delete consignments.";
+    if (inputEmail !== (currentUser.email || "").toLowerCase()) {
+      $("deleteAuthError").textContent = `Email mismatch: Please enter your active manager email (${currentUser.email}) to confirm.`;
       $("deleteAuthError").classList.remove("d-none");
       return;
     }

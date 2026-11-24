@@ -16,6 +16,9 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <!-- Custom Design System Stylesheet -->
   <link rel="stylesheet" href="style.css">
+
+  <!-- Google Identity Services (GIS) OAuth 2.0 SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -74,69 +77,82 @@
       </div>
     </div>
 
-    <!-- Right Login Card Panel -->
+    <!-- Right Login Card Panel: Google OAuth 2.0 -->
     <div class="login-form-side">
       <div class="login-card-v2">
         <div class="mb-4 text-center">
-          <div class="d-inline-flex p-3 rounded-circle bg-primary bg-opacity-10 text-primary mb-2">
-            <i class="bi bi-shield-lock-fill fs-3"></i>
-          </div>
-          <h4 class="fw-bold text-dark mb-1">Sign in to console</h4>
-          <p class="text-muted small mb-0">Access your cold-chain telemetry and operations portal.</p>
-        </div>
-
-        <!-- Google Workspace Single Sign-On (Requirement 1) -->
-        <div class="mb-4">
-          <button type="button" class="btn btn-google-sso w-100 py-2 d-flex align-items-center justify-content-center gap-2" id="btnGoogleLogin">
-            <svg width="18" height="18" viewBox="0 0 24 24">
+          <div class="d-inline-flex p-3 rounded-circle bg-white shadow-sm border mb-3">
+            <svg width="28" height="28" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
             </svg>
-            <span class="fw-semibold">Sign in with Google Workspace</span>
-          </button>
-          <div class="d-flex align-items-center my-3">
-            <hr class="flex-grow-1 my-0 text-muted opacity-25">
-            <span class="px-2 text-muted small" style="font-size: 0.72rem;">OR SIGN IN WITH USER ID</span>
-            <hr class="flex-grow-1 my-0 text-muted opacity-25">
+          </div>
+          <h4 class="fw-bold text-dark mb-1">Sign in with Google</h4>
+          <p class="text-muted small mb-0">Single Sign-On for ColdChain telemetry &amp; operations console</p>
+        </div>
+
+        <!-- Official Google GIS Button Container -->
+        <div id="googleButtonContainer" class="d-flex justify-content-center mb-3"></div>
+
+        <!-- Clean Standard "Continue with Google" Action Button -->
+        <button type="button" class="btn btn-google-sso w-100 py-2 d-flex align-items-center justify-content-center gap-2 mb-3" id="btnContinueWithGoogle">
+          <svg width="20" height="20" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span class="fw-semibold">Continue with Google</span>
+        </button>
+
+        <!-- Divider: Pre-Configured Operational Personnel -->
+        <div class="d-flex align-items-center my-3">
+          <hr class="flex-grow-1 my-0 text-muted opacity-25">
+          <span class="px-2 text-muted small" style="font-size: 0.72rem; letter-spacing: 0.05em;">PRE-CONFIGURED OPERATIONAL ACCOUNTS</span>
+          <hr class="flex-grow-1 my-0 text-muted opacity-25">
+        </div>
+
+        <!-- 1-Click Authorized Personnel -->
+        <div class="d-flex flex-column gap-2 mb-3">
+          <!-- Dhairya: Logistics Manager -->
+          <div class="p-2 border rounded-3 cursor-pointer d-flex align-items-center justify-content-between role-switch-card" id="quickAccountDhairya" style="background: var(--cc-surface-muted);">
+            <div class="d-flex align-items-center gap-2">
+              <div class="user-avatar-circle" style="background: #3478F6; width: 34px; height: 34px; font-size: 0.85rem;">D</div>
+              <div>
+                <div class="fw-bold text-dark small" style="line-height: 1.2;">Dhairya</div>
+                <div class="text-muted" style="font-size: 0.75rem;">dhairyaps2009@gmail.com</div>
+              </div>
+            </div>
+            <span class="badge bg-primary" style="font-size: 0.7rem;">Logistics Manager</span>
+          </div>
+
+          <!-- Sourabh Jeevan: Warehouse Operator -->
+          <div class="p-2 border rounded-3 cursor-pointer d-flex align-items-center justify-content-between role-switch-card" id="quickAccountSourabh" style="background: var(--cc-surface-muted);">
+            <div class="d-flex align-items-center gap-2">
+              <div class="user-avatar-circle" style="background: #0D9488; width: 34px; height: 34px; font-size: 0.85rem;">S</div>
+              <div>
+                <div class="fw-bold text-dark small" style="line-height: 1.2;">Sourabh Jeevan</div>
+                <div class="text-muted" style="font-size: 0.75rem;">sourabhjeevan0794@gmail.com</div>
+              </div>
+            </div>
+            <span class="badge bg-teal text-white" style="font-size: 0.7rem;">Warehouse Operator</span>
           </div>
         </div>
 
-        <!-- Standard Login Form -->
-        <form id="loginForm" novalidate>
-          <div class="mb-3">
-            <label for="loginUsername" class="form-label small fw-semibold text-dark">User ID / Username</label>
-            <div class="input-group">
-              <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-person"></i></span>
-              <input type="text" id="loginUsername" class="form-control border-start-0 ps-0" placeholder="e.g. Arnav or Sourabh" required autocomplete="username">
-            </div>
-          </div>
+        <!-- Sign in with another Google Email button -->
+        <button type="button" class="btn btn-outline-secondary btn-sm w-100 py-2 d-flex align-items-center justify-content-center gap-2" id="btnCustomGoogleEmail">
+          <i class="bi bi-envelope-at"></i>
+          <span>Sign in with another Google Email</span>
+        </button>
 
-          <div class="mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <label for="loginPassword" class="form-label small fw-semibold text-dark mb-0">Password</label>
-              <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none small text-muted" id="togglePassword">
-                <i class="bi bi-eye me-1" id="togglePasswordIcon"></i><span id="togglePasswordText">Show</span>
-              </button>
-            </div>
-            <div class="input-group">
-              <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-lock"></i></span>
-              <input type="password" id="loginPassword" class="form-control border-start-0 ps-0" placeholder="••••••••" required autocomplete="current-password">
-            </div>
-          </div>
-
-          <div id="loginError" class="alert alert-danger py-2 small d-none" role="alert">
-            <i class="bi bi-exclamation-octagon-fill me-1"></i> Invalid User ID or Password. Please try again.
-          </div>
-
-          <button type="submit" class="btn btn-crm-primary w-100 py-2 justify-content-center fw-semibold mt-2" id="loginSubmit">
-            <i class="bi bi-box-arrow-in-right me-1"></i> Launch Operations Console
-          </button>
-        </form>
+        <div id="loginAuthStatus" class="alert alert-info py-2 small d-none mt-3" role="alert">
+          <i class="bi bi-info-circle me-1"></i> <span id="loginAuthStatusText">Processing Google verification...</span>
+        </div>
 
         <div class="mt-4 pt-3 text-center border-top small text-muted">
-          Technical dispatch: <strong>arnavpratap60@gmail.com</strong>
+          Operational telemetry: <strong>dhairyaps2009@gmail.com</strong>
         </div>
       </div>
     </div>
@@ -960,7 +976,7 @@
   <!-- 3. INTERACTIVE MODALS & DIALOGS                                     -->
   <!-- =================================================================== -->
 
-  <!-- MODAL: GOOGLE SSO ACCOUNT CHOOSER (Requirement 1) -->
+  <!-- MODAL: GOOGLE SSO ACCOUNT CHOOSER -->
   <div class="modal fade" id="googleLoginModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow-lg">
@@ -977,13 +993,37 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-4">
-          <p class="small text-muted mb-3">Choose a verified Google Workspace account to proceed to <strong>ColdChain.io</strong>:</p>
+          <p class="small text-muted mb-3">Choose a verified Google account to proceed to <strong>ColdChain.io</strong>:</p>
 
           <div class="d-flex flex-column gap-2 mb-3">
-            <!-- Google Account 1: Arnav -->
+            <!-- Google Account 1: Dhairya -->
+            <div class="p-3 border rounded-3 cursor-pointer d-flex align-items-center justify-content-between role-switch-card" id="googleAccountDhairya" style="background: var(--cc-surface-muted);">
+              <div class="d-flex align-items-center gap-3">
+                <div class="user-avatar-circle" style="background: #3478F6;">D</div>
+                <div>
+                  <div class="fw-bold text-dark small">Dhairya</div>
+                  <div class="text-muted" style="font-size: 0.75rem;">dhairyaps2009@gmail.com</div>
+                </div>
+              </div>
+              <span class="badge bg-primary">Logistics Manager</span>
+            </div>
+
+            <!-- Google Account 2: Sourabh Jeevan -->
+            <div class="p-3 border rounded-3 cursor-pointer d-flex align-items-center justify-content-between role-switch-card" id="googleAccountSourabh" style="background: var(--cc-surface-muted);">
+              <div class="d-flex align-items-center gap-3">
+                <div class="user-avatar-circle" style="background: #0D9488;">S</div>
+                <div>
+                  <div class="fw-bold text-dark small">Sourabh Jeevan</div>
+                  <div class="text-muted" style="font-size: 0.75rem;">sourabhjeevan0794@gmail.com</div>
+                </div>
+              </div>
+              <span class="badge bg-teal text-white">Warehouse Operator</span>
+            </div>
+
+            <!-- Google Account 3: Arnav -->
             <div class="p-3 border rounded-3 cursor-pointer d-flex align-items-center justify-content-between role-switch-card" id="googleAccountArnav" style="background: var(--cc-surface-muted);">
               <div class="d-flex align-items-center gap-3">
-                <div class="user-avatar-circle" style="background: #3478F6;">A</div>
+                <div class="user-avatar-circle" style="background: #2563EB;">A</div>
                 <div>
                   <div class="fw-bold text-dark small">Arnav Pratap Singh</div>
                   <div class="text-muted" style="font-size: 0.75rem;">arnavpratap60@gmail.com</div>
@@ -991,23 +1031,142 @@
               </div>
               <span class="badge bg-primary">Logistics Manager</span>
             </div>
-
-            <!-- Google Account 2: Sourabh -->
-            <div class="p-3 border rounded-3 cursor-pointer d-flex align-items-center justify-content-between role-switch-card" id="googleAccountSourabh" style="background: var(--cc-surface-muted);">
-              <div class="d-flex align-items-center gap-3">
-                <div class="user-avatar-circle" style="background: #0D9488;">S</div>
-                <div>
-                  <div class="fw-bold text-dark small">Sourabh Verma</div>
-                  <div class="text-muted" style="font-size: 0.75rem;">sourabh@coldchain.io</div>
-                </div>
-              </div>
-              <span class="badge bg-teal text-white">Warehouse Operator</span>
-            </div>
           </div>
+
+          <button type="button" class="btn btn-outline-secondary btn-sm w-100 py-2 d-flex align-items-center justify-content-center gap-2" id="btnModalUseAnotherGoogle">
+            <i class="bi bi-person-plus"></i>
+            <span>Use another Google account</span>
+          </button>
         </div>
         <div class="modal-footer bg-light py-2">
           <button type="button" class="btn btn-crm-outline btn-sm" data-bs-dismiss="modal">Cancel</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ENTER CUSTOM GOOGLE EMAIL -->
+  <div class="modal fade" id="customEmailLoginModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header border-bottom py-3">
+          <div class="d-flex align-items-center gap-2">
+            <svg width="22" height="22" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <h6 class="modal-title fw-bold text-dark mb-0">Sign in with Google Account</h6>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="customEmailLoginForm">
+          <div class="modal-body p-4">
+            <p class="small text-muted mb-3">
+              Enter your Google email address. If this account is new, you will be invited to select your operational role (Logistics Manager or Warehouse Operator).
+            </p>
+            <div id="customEmailError" class="alert alert-danger py-2 small d-none" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-1"></i> Please provide a valid email address.
+            </div>
+            <div class="mb-3">
+              <label for="customGoogleEmailInput" class="form-label small fw-semibold text-dark">Google Email Address</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input type="email" id="customGoogleEmailInput" class="form-control" placeholder="your.name@gmail.com" required autocomplete="email">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="customGoogleNameInput" class="form-label small fw-semibold text-dark">Display Name (Optional)</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" id="customGoogleNameInput" class="form-control" placeholder="e.g. Captain Miller">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer bg-light py-2">
+            <button type="button" class="btn btn-crm-outline btn-sm" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-crm-primary btn-sm" id="btnSubmitCustomGoogleEmail">
+              <i class="bi bi-arrow-right-circle me-1"></i> Continue
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NEW USER ROLE ONBOARDING (LOGISTICS MANAGER VS WAREHOUSE OPERATOR) -->
+  <div class="modal fade" id="roleSelectionModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header border-bottom py-3 bg-navy text-white">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-person-badge fs-5 text-info"></i>
+            <div>
+              <h6 class="modal-title fw-bold mb-0">Select Operational Mandate</h6>
+              <div class="small text-white-50" style="font-size: 0.72rem;">Configure Console Workspace &amp; Permissions</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-body p-4">
+          <!-- Google User Profile Card -->
+          <div class="p-3 mb-3 rounded-3 d-flex align-items-center gap-3 border" style="background: var(--cc-surface-muted);">
+            <div id="onboardingUserAvatar" class="user-avatar-circle" style="background: #3478F6;">U</div>
+            <div class="overflow-hidden">
+              <div class="fw-bold text-dark text-truncate" id="onboardingUserName">Google User</div>
+              <div class="text-muted small text-truncate" id="onboardingUserEmail">user@gmail.com</div>
+            </div>
+            <span class="badge bg-success ms-auto"><i class="bi bi-google me-1"></i>Verified</span>
+          </div>
+
+          <p class="small text-muted mb-3">Welcome to ColdChain Monitor! Please select which operational role describes your mandate:</p>
+
+          <div class="d-flex flex-column gap-3">
+            <!-- Option 1: Logistics Manager -->
+            <div class="role-onboarding-option" id="optSelectLogisticsManager">
+              <div class="d-flex align-items-center gap-3 mb-2">
+                <div class="p-2 rounded-circle bg-primary bg-opacity-10 text-primary">
+                  <i class="bi bi-truck fs-4"></i>
+                </div>
+                <div>
+                  <div class="fw-bold text-dark">Logistics Manager</div>
+                  <div class="text-muted" style="font-size: 0.75rem;">Fleet Command &amp; Regulatory Governance</div>
+                </div>
+                <span class="badge bg-primary ms-auto">Manager Console</span>
+              </div>
+              <ul class="small text-muted ps-3 mb-0" style="font-size: 0.75rem;">
+                <li>Comprehensive fleet oversight, route dispatch &amp; telemetry monitoring</li>
+                <li>Emergency cooling regulation &amp; thermal excursion resolutions</li>
+                <li>Cancellation initiation &amp; permanent consignment deletion security</li>
+              </ul>
+            </div>
+
+            <!-- Option 2: Warehouse Operator -->
+            <div class="role-onboarding-option" id="optSelectWarehouseOperator">
+              <div class="d-flex align-items-center gap-3 mb-2">
+                <div class="p-2 rounded-circle bg-teal bg-opacity-10" style="color: #0D9488;">
+                  <i class="bi bi-building-check fs-4"></i>
+                </div>
+                <div>
+                  <div class="fw-bold text-dark">Warehouse Operator</div>
+                  <div class="text-muted" style="font-size: 0.75rem;">Depot Receiving &amp; Cargo Inspection</div>
+                </div>
+                <span class="badge bg-teal text-white ms-auto">Operator Console</span>
+              </div>
+              <ul class="small text-muted ps-3 mb-0" style="font-size: 0.75rem;">
+                <li>In-bound depot cargo verification &amp; physical seal audits</li>
+                <li>Consignment delivery hand-offs &amp; physical temperature audits</li>
+                <li>Warehouse cancellation sign-off queue (Approve / Reject)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer bg-light py-2">
+          <button type="button" class="btn btn-crm-outline btn-sm" id="btnCancelOnboarding">Return to Login</button>
+        </div>
+      </div>
+    </div>
+  </div>
       </div>
     </div>
   </div>
@@ -1278,7 +1437,7 @@
     </div>
   </div>
 
-  <!-- MODAL: DELETE AUTHORIZATION REQUIRING USER ID & PASSWORD -->
+  <!-- MODAL: DELETE AUTHORIZATION VIA GOOGLE MANAGER IDENTITY -->
   <div class="modal fade" id="deleteAuthModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow">
@@ -1291,24 +1450,18 @@
         <form id="deleteAuthForm">
           <div class="modal-body p-4">
             <p class="small text-muted mb-3">
-              Safety guard: Permanent deletion of <strong id="deleteTargetShipmentId" class="text-danger">---</strong> requires credential verification by an authorized Logistics Manager.
+              Safety guard: Permanent deletion of <strong id="deleteTargetShipmentId" class="text-danger">---</strong> requires authorization by an active <strong>Logistics Manager</strong>.
             </p>
             <div id="deleteAuthError" class="alert alert-danger py-2 small d-none" role="alert">
-              <i class="bi bi-exclamation-triangle-fill me-1"></i> Invalid User ID or Password. Deletion unauthorized.
+              <i class="bi bi-exclamation-triangle-fill me-1"></i> Deletion unauthorized.
             </div>
             <div class="mb-3">
-              <label for="deleteAuthUserId" class="form-label small fw-semibold text-dark">Manager User ID</label>
+              <label for="deleteAuthConfirmEmail" class="form-label small fw-semibold text-dark">Confirm Active Manager Email</label>
               <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-person"></i></span>
-                <input type="text" id="deleteAuthUserId" class="form-control" placeholder="e.g. Arnav" required autocomplete="username">
+                <span class="input-group-text"><i class="bi bi-google"></i></span>
+                <input type="email" id="deleteAuthConfirmEmail" class="form-control" placeholder="Enter your Google email to verify" required autocomplete="email">
               </div>
-            </div>
-            <div class="mb-3">
-              <label for="deleteAuthPassword" class="form-label small fw-semibold text-dark">Manager Password</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                <input type="password" id="deleteAuthPassword" class="form-control" placeholder="••••••••" required autocomplete="current-password">
-              </div>
+              <div class="form-text" style="font-size: 0.72rem;">Enter your authenticated Google account email to confirm permanent purge.</div>
             </div>
           </div>
           <div class="modal-footer bg-light py-2">

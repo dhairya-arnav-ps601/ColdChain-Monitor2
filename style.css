@@ -847,3 +847,32 @@ body {
     padding: 1.25rem 1rem;
   }
 }
+
+/* ===================================================================
+   ROLE ONBOARDING & GOOGLE OAUTH ENHANCEMENTS
+   =================================================================== */
+.role-onboarding-option {
+  border: 1.5px solid var(--cc-border);
+  background: var(--cc-card-bg);
+  cursor: pointer;
+  border-radius: var(--cc-radius-md);
+  padding: 1rem 1.25rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.role-onboarding-option:hover {
+  border-color: var(--cc-primary);
+  background: var(--cc-surface-muted);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(52, 120, 246, 0.12);
+}
+
+[data-theme="dark"] .role-onboarding-option {
+  background: #141f32;
+  border-color: #27354a;
+}
+
+[data-theme="dark"] .role-onboarding-option:hover {
+  border-color: #60A5FA;
+  background: #1c2b44;
+}
