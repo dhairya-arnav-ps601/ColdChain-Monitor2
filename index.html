@@ -32,14 +32,11 @@
           </div>
           <div>
             <span class="fs-4 fw-bold text-white tracking-tight">ColdChain<span class="text-info">.io</span></span>
-            <span class="sidebar-badge-v2 ms-2">V2.0 ENTERPRISE</span>
+            <span class="badge bg-white bg-opacity-10 text-white border border-white border-opacity-25 ms-2 font-monospace" style="font-size: 0.65rem;">V2.0 ENTERPRISE</span>
           </div>
         </div>
 
         <div class="mt-5 pt-3" style="max-width: 540px;">
-          <span class="badge bg-primary bg-opacity-25 text-info border border-info border-opacity-25 px-3 py-1 rounded-pill small mb-3">
-            <i class="bi bi-shield-check me-1"></i> GxP &amp; FDA 21 CFR Part 11 Compliant Architecture
-          </span>
           <h1 class="display-6 fw-bold text-white mb-3">
             Intelligent cold-chain telemetry &amp; automated excursion governance.
           </h1>
@@ -64,7 +61,7 @@
             <div class="col-4">
               <div class="p-3 rounded-3 bg-white bg-opacity-10 border border-white border-opacity-10">
                 <div class="text-warning fw-bold fs-4">0%</div>
-                <div class="small text-white-50" style="font-size: 0.72rem;">Spoilage Loss</div>
+                <div class="small text-white-50" style="font-size: 0.72rem;">Unresolved Loss</div>
               </div>
             </div>
           </div>
@@ -80,33 +77,38 @@
     <!-- Right Login Card Panel -->
     <div class="login-form-side">
       <div class="login-card-v2">
-        <div class="mb-4">
+        <div class="mb-4 text-center">
+          <div class="d-inline-flex p-3 rounded-circle bg-primary bg-opacity-10 text-primary mb-2">
+            <i class="bi bi-shield-lock-fill fs-3"></i>
+          </div>
           <h4 class="fw-bold text-dark mb-1">Sign in to console</h4>
-          <p class="text-muted small mb-0">Enter your operational credentials to access your terminal.</p>
+          <p class="text-muted small mb-0">Access your cold-chain telemetry and operations portal.</p>
         </div>
 
-        <!-- Quick Demo Account Fillers -->
-        <div class="mb-4 p-3 bg-light rounded-3 border">
-          <div class="small fw-semibold text-secondary mb-2 d-flex align-items-center justify-content-between">
-            <span><i class="bi bi-lightning-charge-fill text-warning me-1"></i>One-Click Demo Roles:</span>
-            <span class="text-muted" style="font-size: 0.7rem;">Password: 123</span>
-          </div>
-          <div class="d-flex gap-2 flex-wrap">
-            <button type="button" class="quick-cred-chip text-primary fw-semibold" id="fillManagerCreds">
-              <i class="bi bi-person-badge me-1"></i> Arnav (Logistics Manager)
-            </button>
-            <button type="button" class="quick-cred-chip text-teal fw-semibold" id="fillOperatorCreds">
-              <i class="bi bi-box-seam me-1"></i> Sourabh (Warehouse Operator)
-            </button>
+        <!-- Google Workspace Single Sign-On (Requirement 1) -->
+        <div class="mb-4">
+          <button type="button" class="btn btn-google-sso w-100 py-2 d-flex align-items-center justify-content-center gap-2" id="btnGoogleLogin">
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span class="fw-semibold">Sign in with Google Workspace</span>
+          </button>
+          <div class="d-flex align-items-center my-3">
+            <hr class="flex-grow-1 my-0 text-muted opacity-25">
+            <span class="px-2 text-muted small" style="font-size: 0.72rem;">OR SIGN IN WITH USER ID</span>
+            <hr class="flex-grow-1 my-0 text-muted opacity-25">
           </div>
         </div>
 
-        <!-- Login Form -->
+        <!-- Standard Login Form -->
         <form id="loginForm" novalidate>
           <div class="mb-3">
             <label for="loginUsername" class="form-label small fw-semibold text-dark">User ID / Username</label>
             <div class="input-group">
-              <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-person"></i></span>
+              <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-person"></i></span>
               <input type="text" id="loginUsername" class="form-control border-start-0 ps-0" placeholder="e.g. Arnav or Sourabh" required autocomplete="username">
             </div>
           </div>
@@ -119,7 +121,7 @@
               </button>
             </div>
             <div class="input-group">
-              <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-lock"></i></span>
+              <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-lock"></i></span>
               <input type="password" id="loginPassword" class="form-control border-start-0 ps-0" placeholder="••••••••" required autocomplete="current-password">
             </div>
           </div>
@@ -129,12 +131,12 @@
           </div>
 
           <button type="submit" class="btn btn-crm-primary w-100 py-2 justify-content-center fw-semibold mt-2" id="loginSubmit">
-            <i class="bi bi-box-arrow-in-right me-1"></i> Authenticate &amp; Launch Console
+            <i class="bi bi-box-arrow-in-right me-1"></i> Launch Operations Console
           </button>
         </form>
 
         <div class="mt-4 pt-3 text-center border-top small text-muted">
-          Need assistance or role re-assignment? Contact dispatch at <strong>arnavpratap60@gmail.com</strong>
+          Technical dispatch: <strong>arnavpratap60@gmail.com</strong>
         </div>
       </div>
     </div>
@@ -181,7 +183,6 @@
           <span><i class="bi bi-shield-exclamation nav-icon text-danger"></i>Alert Center</span>
           <span class="badge bg-danger rounded-pill" id="navAlertsBadge">0</span>
         </button>
-        <!-- Cancellations Queue: Highlighted especially for Warehouse Operator -->
         <button class="sidebar-nav-btn" id="navCancellations" type="button">
           <span><i class="bi bi-x-octagon nav-icon text-warning"></i>Approvals Queue</span>
           <span class="badge bg-warning text-dark rounded-pill" id="navCancelBadge">0</span>
@@ -195,6 +196,12 @@
           <span class="badge bg-white bg-opacity-10 text-white rounded-pill" id="navCancelledBadge">0</span>
         </button>
 
+        <!-- Spoiled Section (Requirement 6) -->
+        <button class="sidebar-nav-btn" id="navSpoiled" type="button">
+          <span><i class="bi bi-radioactive nav-icon text-danger"></i>Spoiled Cargo</span>
+          <span class="badge bg-danger rounded-pill" id="navSpoiledBadge">0</span>
+        </button>
+
         <!-- Section: Intelligence & Hardware -->
         <div class="sidebar-nav-section-title mt-3">Hardware &amp; Analytics</div>
         <button class="sidebar-nav-btn" id="navDevices" type="button">
@@ -206,7 +213,7 @@
         </button>
 
         <!-- Section: System -->
-        <div class="sidebar-nav-section-title mt-3">Governance</div>
+        <div class="sidebar-nav-section-title mt-3">Account &amp; System</div>
         <button class="sidebar-nav-btn" id="navSettings" type="button">
           <span><i class="bi bi-gear nav-icon"></i>Settings &amp; Profile</span>
         </button>
@@ -214,9 +221,11 @@
 
       <!-- Sidebar User Footer -->
       <div class="sidebar-footer">
-        <div class="user-profile-widget" id="userProfileChip" title="Click to view detailed profile metadata">
+        <div class="user-profile-widget" id="userProfileChip" title="Click to view or edit profile">
           <div class="d-flex align-items-center gap-2 overflow-hidden">
-            <div class="user-avatar-circle" id="sidebarAvatarInitial">A</div>
+            <div class="user-avatar-circle" id="sidebarAvatarContainer">
+              <span id="sidebarAvatarInitial">A</span>
+            </div>
             <div class="overflow-hidden">
               <div class="fw-bold text-white text-truncate small" id="navUserName">Arnav</div>
               <div class="text-white-50 text-truncate" style="font-size: 0.68rem;" id="userRoleBadge">Logistics Manager</div>
@@ -245,12 +254,10 @@
         </div>
 
         <div class="d-flex align-items-center gap-2">
-          <!-- Truthful Telemetry Indicator Badge (Mandated by Playbook) -->
-          <div class="simulation-indicator-badge d-none d-md-inline-flex" title="Telemetry data is generated via calibrated realistic IoT simulation engine">
-            <div class="status-dot-pulse"></div>
-            <span>Simulated IoT Telemetry</span>
-            <span class="text-muted fw-normal">| Fresh</span>
-          </div>
+          <!-- Light & Dark Mode Toggle (Requirement 4) -->
+          <button class="btn-theme-toggle" id="btnThemeToggle" type="button" title="Toggle Light / Dark Mode">
+            <i class="bi bi-moon-stars" id="themeToggleIcon"></i>
+          </button>
 
           <!-- Quick Simulate Ping Action -->
           <button class="btn btn-crm-outline btn-sm" id="btnSimulatePing" type="button" title="Simulate realistic sensor ping across active packages">
@@ -258,16 +265,10 @@
             <span class="d-none d-md-inline">Ping IoT Fleet</span>
           </button>
 
-          <!-- Register Shipment Action (Manager role prioritized) -->
+          <!-- Register Shipment Action -->
           <button class="btn btn-crm-primary btn-sm" id="btnOpenAddShipment" type="button">
             <i class="bi bi-plus-lg"></i>
             <span class="d-none d-md-inline">New Shipment</span>
-          </button>
-
-          <!-- Switch User Role Quick Button -->
-          <button class="btn btn-crm-outline btn-sm" id="btnQuickSwitchRole" type="button" title="Switch between Manager and Operator persona">
-            <i class="bi bi-arrow-left-right text-info"></i>
-            <span class="d-none d-lg-inline">Switch Role</span>
           </button>
         </div>
       </header>
@@ -280,7 +281,7 @@
         <!-- ============================================================= -->
         <div id="viewDashboard">
 
-          <!-- Operator Cancellation Decisions Banner (for Logistics Manager) -->
+          <!-- Operator Cancellation Decisions Banner (Clean Card) -->
           <div id="managerNotificationsContainer"></div>
 
           <!-- Welcome & Operational Context Header -->
@@ -292,8 +293,8 @@
               <p class="text-muted small mb-0">Here is your live cold-chain telemetry and excursion status across India hubs.</p>
             </div>
             <div class="d-flex align-items-center gap-2">
-              <span class="badge bg-white text-secondary border px-3 py-2 small shadow-xs">
-                <i class="bi bi-calendar3 me-1 text-primary"></i> <span id="liveClockDate">23 Nov 2026</span>
+              <span class="badge bg-card text-secondary border px-3 py-2 small shadow-xs">
+                <i class="bi bi-calendar3 me-1 text-primary"></i> <span id="liveClockDate">24 Nov 2026</span>
               </span>
             </div>
           </div>
@@ -304,7 +305,7 @@
               <div class="kpi-card-v2 kpi-primary">
                 <div class="d-flex justify-content-between align-items-start">
                   <div class="kpi-title">Active Freight</div>
-                  <span class="kpi-badge-trend text-primary bg-primary bg-opacity-10"><i class="bi bi-truck"></i> Live</span>
+                  <span class="badge bg-primary bg-opacity-10 text-primary"><i class="bi bi-truck"></i> Live</span>
                 </div>
                 <div class="kpi-value" id="statTotal">0</div>
                 <div class="small text-muted mt-2">Refrigerated units in transit</div>
@@ -315,7 +316,7 @@
               <div class="kpi-card-v2 kpi-success">
                 <div class="d-flex justify-content-between align-items-start">
                   <div class="kpi-title">Compliant Range</div>
-                  <span class="kpi-badge-trend text-success bg-success bg-opacity-10"><i class="bi bi-shield-check"></i> Safe</span>
+                  <span class="badge bg-success bg-opacity-10 text-success"><i class="bi bi-shield-check"></i> Safe</span>
                 </div>
                 <div class="kpi-value text-success" id="statNormal">0</div>
                 <div class="small text-muted mt-2">Within configured bounds</div>
@@ -326,7 +327,7 @@
               <div class="kpi-card-v2 kpi-warning">
                 <div class="d-flex justify-content-between align-items-start">
                   <div class="kpi-title">Warning Alerts</div>
-                  <span class="kpi-badge-trend text-warning bg-warning bg-opacity-10"><i class="bi bi-exclamation-triangle"></i> Drift</span>
+                  <span class="badge bg-warning bg-opacity-10 text-warning"><i class="bi bi-exclamation-triangle"></i> Drift</span>
                 </div>
                 <div class="kpi-value text-warning" id="statWarning">0</div>
                 <div class="small text-muted mt-2">&lt; 2.0°C excursion margin</div>
@@ -334,10 +335,10 @@
             </div>
 
             <div class="col-6 col-md-4 col-xl">
-              <div class="kpi-card-v2 kpi-critical cursor-pointer" id="kpiCriticalCard" role="button" tabindex="0" title="Click to filter Critical alerts">
+              <div class="kpi-card-v2 kpi-critical cursor-pointer" id="kpiCriticalCard" role="button" tabindex="0" title="Click to view alerts">
                 <div class="d-flex justify-content-between align-items-start">
                   <div class="kpi-title">Critical Breaches</div>
-                  <span class="kpi-badge-trend text-danger bg-danger bg-opacity-10"><i class="bi bi-x-octagon"></i> Breach</span>
+                  <span class="badge bg-danger bg-opacity-10 text-danger"><i class="bi bi-x-octagon"></i> Breach</span>
                 </div>
                 <div class="kpi-value text-danger" id="statCritical">0</div>
                 <div class="small text-muted mt-2">&ge; 2.0°C thermal breach</div>
@@ -348,7 +349,7 @@
               <div class="kpi-card-v2 kpi-info">
                 <div class="d-flex justify-content-between align-items-start">
                   <div class="kpi-title">IoT Gateways</div>
-                  <span class="kpi-badge-trend text-info bg-info bg-opacity-10"><i class="bi bi-wifi"></i> Online</span>
+                  <span class="badge bg-info bg-opacity-10 text-info"><i class="bi bi-wifi"></i> Online</span>
                 </div>
                 <div class="kpi-value text-info" id="statGateways">8 / 8</div>
                 <div class="small text-muted mt-2">100% gateway telemetry reach</div>
@@ -363,7 +364,7 @@
                 <div class="crm-card-header">
                   <div>
                     <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-activity text-primary me-2"></i>Active Freight Thermal Readings vs Limits</h6>
-                    <small class="text-muted">Current simulated sensor telemetry across all active packages</small>
+                    <small class="text-muted">Current sensor telemetry across all active packages</small>
                   </div>
                   <span class="badge bg-light text-dark border">Real-Time Sync</span>
                 </div>
@@ -445,7 +446,7 @@
             <div class="p-3 bg-light border-bottom d-flex flex-wrap gap-2 justify-content-between align-items-center">
               <div class="d-flex gap-2 flex-grow-1" style="max-width: 520px;">
                 <div class="input-group input-group-sm">
-                  <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                  <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
                   <input type="text" id="searchInput" class="form-control" placeholder="Search by ID, Cargo, Origin, or Destination...">
                 </div>
                 <select id="statusFilter" class="form-select form-select-sm w-auto">
@@ -463,7 +464,7 @@
               </div>
 
               <div class="d-flex align-items-center gap-2 small text-muted">
-                <span id="shipmentCountSummary">Showing 8 shipments</span>
+                <span id="shipmentCountSummary">Showing active consignments</span>
               </div>
             </div>
 
@@ -485,10 +486,10 @@
               </table>
             </div>
 
-            <!-- Table Footer with Pagination info -->
+            <!-- Table Footer -->
             <div class="p-3 border-top d-flex justify-content-between align-items-center small text-muted">
-              <div>Telemetry source: <strong>Simulated Calibrated Gateway Engine</strong></div>
-              <div id="shipmentPaginationInfo">Page 1 of 1</div>
+              <div>Telemetry source: <strong>Simulated Calibrated Sensor Engine</strong></div>
+              <div>Live Operational View</div>
             </div>
           </div>
         </div>
@@ -515,9 +516,9 @@
             </div>
             <div class="col-6 col-md-3">
               <div class="kpi-card-v2 kpi-primary">
-                <div class="kpi-title">Operator Requests</div>
+                <div class="kpi-title">New Consignments &amp; Requests</div>
                 <div class="kpi-value text-primary" id="alertStatRequests">0</div>
-                <div class="small text-muted mt-1">Dispatched to Manager</div>
+                <div class="small text-muted mt-1">Dispatched to team</div>
               </div>
             </div>
             <div class="col-6 col-md-3">
@@ -536,7 +537,7 @@
                 <i class="bi bi-shield-exclamation text-danger fs-5"></i>
                 <div>
                   <h6 class="fw-bold mb-0 text-dark">Incident &amp; Spoilage Prevention Center</h6>
-                  <small class="text-muted">Real-time thermal breach logs, operator notices, and resolution workflows</small>
+                  <small class="text-muted">Real-time thermal breach logs, new consignment notices, and resolution workflows</small>
                 </div>
               </div>
               <div class="d-flex gap-2">
@@ -547,8 +548,8 @@
             </div>
 
             <!-- Severity Filter Tabs -->
-            <div class="px-3 pt-2 bg-light border-bottom d-flex gap-2">
-              <button class="btn btn-sm btn-link text-decoration-none fw-semibold active text-primary border-bottom border-primary pb-2 rounded-0" id="filterAlertAll">All Alerts</button>
+            <div class="px-3 pt-2 bg-light border-bottom d-flex gap-2 flex-wrap">
+              <button class="btn btn-sm btn-link text-decoration-none fw-semibold active text-primary border-bottom border-primary pb-2 rounded-0" id="filterAlertAll">All Notices</button>
               <button class="btn btn-sm btn-link text-decoration-none text-muted pb-2 rounded-0" id="filterAlertCritical">Critical Only</button>
               <button class="btn btn-sm btn-link text-decoration-none text-muted pb-2 rounded-0" id="filterAlertWarning">Warnings Only</button>
               <button class="btn btn-sm btn-link text-decoration-none text-muted pb-2 rounded-0" id="filterAlertCancellations">Cancellation Notices</button>
@@ -574,14 +575,6 @@
               </div>
               <div class="d-flex align-items-center gap-2">
                 <span class="badge bg-warning text-dark px-3 py-2" id="pendingCancelBadge">0 Pending Decisions</span>
-              </div>
-            </div>
-
-            <!-- Explanatory Workflow Banner -->
-            <div class="p-3 bg-light border-bottom small text-muted d-flex align-items-center gap-3">
-              <i class="bi bi-info-circle-fill text-primary fs-5"></i>
-              <div>
-                <strong>Two-Person Governance Workflow:</strong> When Logistics Managers request cancellation due to thermal shock, container compromise, or route diversion, the Warehouse Operator at the receiving depot must inspect and verify the physical load before approving closure.
               </div>
             </div>
 
@@ -671,7 +664,70 @@
         </div>
 
         <!-- ============================================================= -->
-        <!-- VIEW 7: IOT DEVICE FLEET (NEW V2.0 MODULE)                    -->
+        <!-- VIEW 7: SPOILED CARGO SECTION (Requirement 6)                 -->
+        <!-- ============================================================= -->
+        <div id="viewSpoiled" class="d-none">
+          <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+              <div class="kpi-card-v2 kpi-critical">
+                <div class="kpi-title">Quarantined / Spoiled Units</div>
+                <div class="kpi-value text-danger" id="spoiledCountTotal">0</div>
+                <div class="small text-muted mt-2">Thermal breach quarantine records</div>
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="kpi-card-v2 kpi-warning">
+                <div class="kpi-title">Primary Incident Cause</div>
+                <div class="kpi-value text-warning fs-5 mt-2">Compressor Failure</div>
+                <div class="small text-muted mt-2">Accounted for 67% of spoiled freight</div>
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="kpi-card-v2 kpi-info">
+                <div class="kpi-title">Biohazard Disposal State</div>
+                <div class="kpi-value text-info fs-5 mt-2">Certified Disposed</div>
+                <div class="small text-muted mt-2">Follows hazardous cold-chain protocol</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="crm-card mb-4">
+            <div class="crm-card-header flex-wrap gap-2">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-radioactive text-danger fs-5"></i>
+                <div>
+                  <h6 class="fw-bold mb-0 text-dark">Spoiled Cargo &amp; Quarantine Log</h6>
+                  <small class="text-muted">Consignments compromised by severe thermal shock or seal compromise</small>
+                </div>
+              </div>
+              <button class="btn btn-sm btn-crm-outline" id="btnExportSpoiledCSV">
+                <i class="bi bi-download me-1"></i> Export Spoilage Log (CSV)
+              </button>
+            </div>
+
+            <div class="table-responsive">
+              <table class="crm-table">
+                <thead>
+                  <tr>
+                    <th>Consignment ID</th>
+                    <th>Cargo Type</th>
+                    <th>Route</th>
+                    <th>Safe Band vs Observed Peak</th>
+                    <th>Spoilage Incident Cause</th>
+                    <th>Declared By</th>
+                    <th>Quarantine / Disposal State</th>
+                    <th>Timestamp</th>
+                    <th class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="spoiledBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- VIEW 8: IOT DEVICE FLEET MODULE                               -->
         <!-- ============================================================= -->
         <div id="viewDevices" class="d-none">
           <div class="crm-card mb-4">
@@ -684,12 +740,8 @@
                 </div>
               </div>
               <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2">
-                <i class="bi bi-hdd-network me-1"></i> 8 Active Hardware Probes
+                <i class="bi bi-hdd-network me-1"></i> 8 Active Probes Connected
               </span>
-            </div>
-
-            <div class="p-3 bg-light border-bottom small text-muted">
-              <i class="bi bi-shield-check text-success me-1"></i> <strong>Telemetry Provenance:</strong> Hardware status generated via simulated calibrated sensor loggers adhering to ISO/IEC 17025 thermal measurement standards.
             </div>
 
             <div class="crm-card-body">
@@ -699,7 +751,7 @@
         </div>
 
         <!-- ============================================================= -->
-        <!-- VIEW 8: ANALYTICS & COMPLIANCE REPORTS (NEW V2.0 MODULE)     -->
+        <!-- VIEW 9: ANALYTICS & COMPLIANCE REPORTS                        -->
         <!-- ============================================================= -->
         <div id="viewReports" class="d-none">
           <div class="crm-card mb-4">
@@ -719,21 +771,21 @@
             <div class="crm-card-body">
               <div class="row g-4 mb-4">
                 <div class="col-12 col-md-4">
-                  <div class="p-3 border rounded-3 bg-light">
+                  <div class="p-3 border rounded-3 bg-card">
                     <span class="text-muted small text-uppercase fw-semibold">Global Compliance Score</span>
                     <h3 class="fw-bold text-success mt-2 mb-1" id="reportComplianceScore">96.4%</h3>
                     <div class="small text-muted">Calculated against WHO Good Distribution Practice standards.</div>
                   </div>
                 </div>
                 <div class="col-12 col-md-4">
-                  <div class="p-3 border rounded-3 bg-light">
+                  <div class="p-3 border rounded-3 bg-card">
                     <span class="text-muted small text-uppercase fw-semibold">Mean Excursion Duration</span>
                     <h3 class="fw-bold text-primary mt-2 mb-1">18.5 mins</h3>
                     <div class="small text-muted">Average time between alert trip and regulation resolution.</div>
                   </div>
                 </div>
                 <div class="col-12 col-md-4">
-                  <div class="p-3 border rounded-3 bg-light">
+                  <div class="p-3 border rounded-3 bg-card">
                     <span class="text-muted small text-uppercase fw-semibold">Spoilage Incident Rate</span>
                     <h3 class="fw-bold text-dark mt-2 mb-1">0.0%</h3>
                     <div class="small text-muted">Zero spoiled consignments due to timely alert mitigation.</div>
@@ -790,34 +842,66 @@
         </div>
 
         <!-- ============================================================= -->
-        <!-- VIEW 9: SETTINGS & USER PROFILE (NEW V2.0 MODULE)             -->
+        <!-- VIEW 10: RESPONSIVE EDITABLE PROFILE & SETTINGS (Req 2 & 3)   -->
         <!-- ============================================================= -->
         <div id="viewSettings" class="d-none">
           <div class="row g-4 mb-4">
-            <div class="col-12 col-lg-5">
+            <!-- Editable Profile Card -->
+            <div class="col-12 col-lg-6">
               <div class="crm-card">
                 <div class="crm-card-header">
-                  <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-person-circle text-primary me-2"></i>Active Operational Profile</h6>
-                  <span class="badge bg-success-subtle text-success">Verified Session</span>
+                  <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-person-gear text-primary me-2"></i>Edit Operational Profile</h6>
+                  <span class="badge bg-success-subtle text-success">Active Session</span>
                 </div>
                 <div class="crm-card-body">
-                  <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
-                    <div class="profile-modal-avatar">
-                      <i class="bi bi-person-fill"></i>
+                  <form id="settingsProfileForm">
+                    <div class="text-center mb-4">
+                      <div class="profile-avatar-edit-container">
+                        <img src="" alt="Profile Photo" id="settingsAvatarPreview" class="profile-avatar-img">
+                        <label for="settingsPhotoUpload" class="profile-avatar-edit-btn" title="Upload custom photo">
+                          <i class="bi bi-camera-fill"></i>
+                        </label>
+                        <input type="file" id="settingsPhotoUpload" accept="image/*" class="d-none">
+                      </div>
+                      <div class="small text-muted">Click camera icon to change profile photo</div>
                     </div>
-                    <div>
-                      <h5 class="fw-bold text-dark mb-1" id="settingsProfileName">Arnav</h5>
-                      <span class="badge bg-primary" id="settingsProfileRole">Logistics Manager</span>
-                      <div class="small text-muted mt-1">Polaris School of Technology Bangalore</div>
-                    </div>
-                  </div>
 
-                  <dl class="row small mb-0" id="settingsProfileDetails"></dl>
+                    <div class="mb-3">
+                      <label for="settingsNameInput" class="form-label small fw-semibold text-dark">Full Name</label>
+                      <input type="text" id="settingsNameInput" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="settingsEmailInput" class="form-label small fw-semibold text-dark">Email Address</label>
+                      <input type="email" id="settingsEmailInput" class="form-control" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                      <div class="col-12 col-sm-6">
+                        <label for="settingsPhoneInput" class="form-label small fw-semibold text-dark">Phone Number</label>
+                        <input type="text" id="settingsPhoneInput" class="form-control">
+                      </div>
+                      <div class="col-12 col-sm-6">
+                        <label for="settingsStationInput" class="form-label small fw-semibold text-dark">Station / Hub</label>
+                        <input type="text" id="settingsStationInput" class="form-control">
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="settingsDutyInput" class="form-label small fw-semibold text-dark">Operational Duty</label>
+                      <textarea id="settingsDutyInput" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-crm-primary btn-sm w-100 justify-content-center">
+                      <i class="bi bi-check2-circle me-1"></i> Save Profile Changes
+                    </button>
+                  </form>
                 </div>
               </div>
             </div>
 
-            <div class="col-12 col-lg-7">
+            <!-- System Settings -->
+            <div class="col-12 col-lg-6">
               <div class="crm-card mb-4">
                 <div class="crm-card-header">
                   <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-sliders text-primary me-2"></i>Telemetry &amp; Governance Rules</h6>
@@ -840,14 +924,17 @@
                     </div>
                   </div>
 
-                  <div class="d-flex justify-content-between align-items-center pt-2">
-                    <div>
-                      <div class="fw-semibold small text-dark">Fast Role Switcher</div>
-                      <div class="text-muted small">Switch between Logistics Manager and Warehouse Operator instantly.</div>
+                  <div>
+                    <label class="form-label small fw-semibold text-dark">Display Theme</label>
+                    <div class="d-flex align-items-center justify-content-between p-3 border rounded-3 bg-card">
+                      <div>
+                        <div class="fw-semibold small text-dark">Dark Workspace Mode</div>
+                        <div class="text-muted small">Toggle between clean light and dark navy themes.</div>
+                      </div>
+                      <button class="btn btn-sm btn-crm-outline" id="btnSettingsThemeToggle" type="button">
+                        <i class="bi bi-moon-stars me-1"></i> Toggle Theme
+                      </button>
                     </div>
-                    <button class="btn btn-sm btn-crm-outline" id="btnSettingsSwitchRole">
-                      <i class="bi bi-arrow-left-right me-1"></i> Switch User Role
-                    </button>
                   </div>
                 </div>
               </div>
@@ -858,7 +945,7 @@
       </main>
 
       <!-- Global Enterprise Footer -->
-      <footer class="py-3 px-4 border-top bg-white small text-muted d-flex flex-wrap justify-content-between align-items-center">
+      <footer class="py-3 px-4 border-top bg-card small text-muted d-flex flex-wrap justify-content-between align-items-center">
         <div>
           <strong>ColdChain Monitor V2.0</strong> &bull; Applied AI OJT Capstone Project &bull; Polaris School of Technology Bangalore
         </div>
@@ -873,82 +960,131 @@
   <!-- 3. INTERACTIVE MODALS & DIALOGS                                     -->
   <!-- =================================================================== -->
 
-  <!-- MODAL: DETAILED USER PROFILE -->
-  <div class="modal fade" id="userProfileModal" tabindex="-1" aria-hidden="true">
+  <!-- MODAL: GOOGLE SSO ACCOUNT CHOOSER (Requirement 1) -->
+  <div class="modal fade" id="googleLoginModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow-lg">
-        <div class="modal-header bg-navy text-white">
-          <h6 class="modal-title fw-bold"><i class="bi bi-person-badge me-2 text-info"></i>Operator Identity Profile</h6>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body p-4">
-          <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
-            <div class="profile-modal-avatar">
-              <i class="bi bi-person-check-fill"></i>
-            </div>
-            <div>
-              <h5 class="mb-0 fw-bold" id="profModalName">Arnav</h5>
-              <span class="badge bg-primary" id="profModalRole">Logistics Manager</span>
-              <span class="badge bg-success-subtle text-success ms-1">Active Terminal</span>
-            </div>
+        <div class="modal-header border-bottom py-3">
+          <div class="d-flex align-items-center gap-2">
+            <svg width="22" height="22" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <h6 class="modal-title fw-bold text-dark mb-0">Sign in with Google</h6>
           </div>
-
-          <h6 class="fw-bold small text-secondary text-uppercase mb-2">Core Mandate</h6>
-          <p class="small text-muted p-2 bg-light rounded-2 mb-3 fw-semibold" id="profModalDuty">OJT project under Kshitij sir</p>
-
-          <h6 class="fw-bold small text-secondary text-uppercase mb-2">Operational Details</h6>
-          <dl class="row small mb-0" id="profModalDetailsList"></dl>
-        </div>
-        <div class="modal-footer bg-light py-2">
-          <button type="button" class="btn btn-crm-outline btn-sm" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: QUICK ROLE SWITCHER -->
-  <div class="modal fade" id="switchRoleModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow-lg">
-        <div class="modal-header bg-navy text-white">
-          <h6 class="modal-title fw-bold"><i class="bi bi-arrow-left-right me-2 text-info"></i>Select Active Persona</h6>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-4">
-          <p class="small text-muted mb-3">Switch between operational profiles to verify role-based permissions and approval flows:</p>
-          
-          <div class="d-flex flex-column gap-3">
-            <div class="p-3 border rounded-3 cursor-pointer role-switch-card" id="switchCardArnav" style="background: #F8FAFC;">
-              <div class="d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center gap-3">
-                  <div class="user-avatar-circle">A</div>
-                  <div>
-                    <div class="fw-bold text-dark">Arnav</div>
-                    <div class="small text-primary fw-semibold">Logistics Manager</div>
-                  </div>
+          <p class="small text-muted mb-3">Choose a verified Google Workspace account to proceed to <strong>ColdChain.io</strong>:</p>
+
+          <div class="d-flex flex-column gap-2 mb-3">
+            <!-- Google Account 1: Arnav -->
+            <div class="p-3 border rounded-3 cursor-pointer d-flex align-items-center justify-content-between role-switch-card" id="googleAccountArnav" style="background: var(--cc-surface-muted);">
+              <div class="d-flex align-items-center gap-3">
+                <div class="user-avatar-circle" style="background: #3478F6;">A</div>
+                <div>
+                  <div class="fw-bold text-dark small">Arnav Pratap Singh</div>
+                  <div class="text-muted" style="font-size: 0.75rem;">arnavpratap60@gmail.com</div>
                 </div>
-                <span class="badge bg-primary">Full Fleet Oversight</span>
               </div>
-              <div class="small text-muted mt-2">Can register packages, request cancellations, regulate temperature excursions, and authorize deletions.</div>
+              <span class="badge bg-primary">Logistics Manager</span>
             </div>
 
-            <div class="p-3 border rounded-3 cursor-pointer role-switch-card" id="switchCardSourabh" style="background: #F8FAFC;">
-              <div class="d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center gap-3">
-                  <div class="user-avatar-circle" style="background: #0D9488;">S</div>
-                  <div>
-                    <div class="fw-bold text-dark">Sourabh</div>
-                    <div class="small text-teal fw-semibold">Warehouse Operator</div>
-                  </div>
+            <!-- Google Account 2: Sourabh -->
+            <div class="p-3 border rounded-3 cursor-pointer d-flex align-items-center justify-content-between role-switch-card" id="googleAccountSourabh" style="background: var(--cc-surface-muted);">
+              <div class="d-flex align-items-center gap-3">
+                <div class="user-avatar-circle" style="background: #0D9488;">S</div>
+                <div>
+                  <div class="fw-bold text-dark small">Sourabh Verma</div>
+                  <div class="text-muted" style="font-size: 0.75rem;">sourabh@coldchain.io</div>
                 </div>
-                <span class="badge bg-teal text-white">Depot Authority</span>
               </div>
-              <div class="small text-muted mt-2">Can approve/reject shipment cancellations, mark packages as delivered, and dispatch alert requests.</div>
+              <span class="badge bg-teal text-white">Warehouse Operator</span>
             </div>
           </div>
         </div>
         <div class="modal-footer bg-light py-2">
           <button type="button" class="btn btn-crm-outline btn-sm" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDITABLE RESPONSIVE USER PROFILE (Requirement 2) -->
+  <div class="modal fade" id="userProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header bg-navy text-white">
+          <h6 class="modal-title fw-bold"><i class="bi bi-person-badge me-2 text-info"></i>Operator Profile</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <!-- View Mode -->
+          <div id="profileViewMode">
+            <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
+              <div class="profile-avatar-edit-container mb-0" style="width: 56px; height: 56px;">
+                <img src="" alt="Avatar" id="modalProfileAvatar" class="profile-avatar-img" style="width: 56px; height: 56px;">
+              </div>
+              <div>
+                <h5 class="mb-0 fw-bold" id="profModalName">Arnav</h5>
+                <span class="badge bg-primary" id="profModalRole">Logistics Manager</span>
+                <span class="badge bg-success-subtle text-success ms-1">Active</span>
+              </div>
+            </div>
+
+            <h6 class="fw-bold small text-secondary text-uppercase mb-2">Core Mandate</h6>
+            <p class="small text-muted p-2 bg-light rounded-2 mb-3 fw-semibold" id="profModalDuty">Cold-chain logistics governance</p>
+
+            <h6 class="fw-bold small text-secondary text-uppercase mb-2">Operational Details</h6>
+            <dl class="row small mb-3" id="profModalDetailsList"></dl>
+
+            <button type="button" class="btn btn-crm-outline btn-sm w-100 justify-content-center" id="btnToggleProfileEdit">
+              <i class="bi bi-pencil-square me-1"></i> Edit Profile Details
+            </button>
+          </div>
+
+          <!-- Edit Mode Form -->
+          <form id="modalProfileEditForm" class="d-none">
+            <div class="text-center mb-3">
+              <div class="profile-avatar-edit-container">
+                <img src="" alt="Avatar" id="modalEditAvatarPreview" class="profile-avatar-img">
+                <label for="modalPhotoUpload" class="profile-avatar-edit-btn" title="Change photo">
+                  <i class="bi bi-camera-fill"></i>
+                </label>
+                <input type="file" id="modalPhotoUpload" accept="image/*" class="d-none">
+              </div>
+              <div class="small text-muted">Upload custom photo</div>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label small fw-semibold">Full Name</label>
+              <input type="text" id="modalEditName" class="form-control form-control-sm" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small fw-semibold">Email</label>
+              <input type="email" id="modalEditEmail" class="form-control form-control-sm" required>
+            </div>
+            <div class="row g-2 mb-2">
+              <div class="col-6">
+                <label class="form-label small fw-semibold">Phone</label>
+                <input type="text" id="modalEditPhone" class="form-control form-control-sm">
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-semibold">Station / Hub</label>
+                <input type="text" id="modalEditStation" class="form-control form-control-sm">
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+              <button type="button" class="btn btn-crm-outline btn-sm flex-grow-1" id="btnCancelProfileEdit">Cancel</button>
+              <button type="submit" class="btn btn-crm-primary btn-sm flex-grow-1 justify-content-center">Save Profile</button>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer bg-light py-2">
+          <button type="button" class="btn btn-crm-outline btn-sm" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
@@ -997,7 +1133,58 @@
           </div>
           <div class="modal-footer bg-light py-2">
             <button type="button" class="btn btn-crm-outline btn-sm" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-crm-primary btn-sm">Save &amp; Activate Sensor</button>
+            <button type="submit" class="btn btn-crm-primary btn-sm">Save &amp; Notify Dispatch</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DECLARE CARGO SPOILED (Requirement 6) -->
+  <div class="modal fade" id="declareSpoiledModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-danger text-white">
+          <h6 class="modal-title fw-bold"><i class="bi bi-radioactive me-2"></i>Declare Consignment as Spoiled</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="declareSpoiledForm">
+          <div class="modal-body p-4">
+            <input type="hidden" id="spoilTargetShipmentId">
+            <p class="small text-muted mb-3">
+              Quarantine and condemn cargo for <strong id="spoilTargetLabel" class="text-danger">---</strong>. This action transfers the consignment into the <strong>Spoiled Cargo</strong> section and logs an incident report.
+            </p>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Primary Spoilage Cause</label>
+              <select id="spoilCauseSelect" class="form-select form-select-sm" required>
+                <option value="Severe Prolonged Thermal Breach (>2.0°C excursion)">Severe Prolonged Thermal Breach (>2.0°C excursion)</option>
+                <option value="Refrigeration Compressor Burnout">Refrigeration Compressor Burnout</option>
+                <option value="Cargo Container Seal Rupture">Cargo Container Seal Rupture</option>
+                <option value="Bacterial / Spoilage Odor Detected on Arrival">Bacterial / Spoilage Odor Detected on Arrival</option>
+                <option value="Client Quality Rejection">Client Quality Rejection</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Quarantine / Disposal State</label>
+              <select id="spoilQuarantineStatus" class="form-select form-select-sm" required>
+                <option value="Quarantined in Cold Depot Isolator">Quarantined in Cold Depot Isolator</option>
+                <option value="Hazardous Biohazard Condemnation">Hazardous Biohazard Condemnation</option>
+                <option value="Returned to Manufacturer for Destruction">Returned to Manufacturer for Destruction</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Inspection Officer Notes</label>
+              <textarea id="spoilNotes" class="form-control form-control-sm" rows="2" placeholder="Record physical appearance, probe sensor telemetry, and terminal inspection..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer bg-light py-2">
+            <button type="button" class="btn btn-crm-outline btn-sm" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-danger btn-sm">
+              <i class="bi bi-radioactive me-1"></i> Confirm Spoilage Quarantine
+            </button>
           </div>
         </form>
       </div>
@@ -1058,7 +1245,7 @@
           <div class="modal-body">
             <input type="hidden" id="cancelShipmentId">
             <p class="small text-muted mb-3">
-              Request formal cancellation for <strong id="cancelShipmentLabel" class="text-dark">---</strong>. This request will be queued for <strong>Warehouse Operator (Sourabh)</strong> verification and approval.
+              Request formal cancellation for <strong id="cancelShipmentLabel" class="text-dark">---</strong>. This request will be queued for <strong>Warehouse Operator</strong> verification and approval.
             </p>
             <div class="mb-3">
               <label for="cancelReasonSelect" class="form-label small fw-semibold text-dark">Reason for Cancellation</label>

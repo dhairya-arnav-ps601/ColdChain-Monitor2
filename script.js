@@ -2,45 +2,40 @@
  * ===================================================================
  * COLDCHAIN MONITOR V2.0 - MASTER CONTROLLER (script.js)
  * Enterprise Cold-Chain Logistics, Excursion Governance & IoT Telemetry
- * Preserves 100% of existing workflows, RBAC rules, & LocalStorage schemas
+ * Enhanced: Google Login, Editable Profile, Dark Mode, Spoiled Section,
+ * Dual-Role Alerts, and Responsive Resetting Notification Badges
  * ===================================================================
  */
 
 // 1. Authorized User Accounts & Personas
 const USERS = [
-  { username: "Arnav", pass: "123", name: "Arnav", role: "Logistics Manager" },
-  { username: "Sourabh", pass: "123", name: "Sourabh", role: "Warehouse Operator" }
+  { username: "Arnav", pass: "123", name: "Arnav Pratap Singh", role: "Logistics Manager", email: "arnavpratap60@gmail.com" },
+  { username: "Sourabh", pass: "123", name: "Sourabh Verma", role: "Warehouse Operator", email: "sourabh@coldchain.io" }
 ];
 
-// 2. Individual Profile Metadata
-const PROFILES = {
+// 2. Individual Profile Metadata (Default Templates)
+const DEFAULT_PROFILES = {
   Arnav: {
     username: "Arnav",
-    name: "Arnav",
+    name: "Arnav Pratap Singh",
     role: "Logistics Manager",
     badgeClass: "bg-primary",
+    email: "arnavpratap60@gmail.com",
+    phone: "852 8600 376",
+    station: "Polaris School of Technology Bangalore (Command HQ)",
     duty: "Fleet oversight, route dispatch, thermal regulation & incident authorization",
-    details: {
-      "Email": "arnavpratap60@gmail.com",
-      "Phone": "852 8600 376",
-      "Station / Hub": "Polaris School of Technology Bangalore (Command HQ)",
-      "Shift Hours": "08:00 - 17:00 IST",
-      "Authority Level": "Tier 3 - Master Dispatch & Emergency Regulation"
-    }
+    photo: ""
   },
   Sourabh: {
     username: "Sourabh",
-    name: "Sourabh",
+    name: "Sourabh Verma",
     role: "Warehouse Operator",
     badgeClass: "bg-teal text-white",
+    email: "sourabh@coldchain.io",
+    phone: "70195 885 90",
+    station: "Polaris School of Technology Bangalore (Depot 4B)",
     duty: "In-bound receiving, physical seal inspection, alert acknowledgement & cancellation decisions",
-    details: {
-      "Email": "sourabh@coldchain.io",
-      "Phone": "70195 885 90",
-      "Station / Hub": "Polaris School of Technology Bangalore (Depot 4B)",
-      "Shift Hours": "14:00 - 23:00 IST",
-      "Authority Level": "Tier 2 - Terminal Inspection & Cancellation Sign-Off"
-    }
+    photo: ""
   }
 };
 
@@ -261,6 +256,44 @@ const INITIAL_SHIPMENTS = [
     readings: [
       { temp: 5.5, time: "17:15" }
     ]
+  },
+
+  // --- 2 INITIAL SPOILED QUARANTINE PACKAGES (Requirement 6) ---
+  {
+    id: "SHP-401",
+    cargo: "Pasteurized Milk Batches",
+    origin: "Belagavi",
+    dest: "Hubballi",
+    min: 1,
+    max: 4,
+    status: "Spoiled",
+    spoilCause: "Severe Prolonged Thermal Breach (>2.0°C excursion)",
+    spoilNotes: "Chiller compressor belt failed in transit. Core temperature climbed to 19.5°C; lactic souring verified.",
+    spoilDeclaredBy: "Sourabh Verma (Warehouse Operator)",
+    spoilQuarantineStatus: "Quarantined in Cold Depot Isolator",
+    spoiledAt: "22/11/2026 14:15",
+    readings: [
+      { temp: 2.8, time: "08:00" },
+      { temp: 19.5, time: "13:30" }
+    ]
+  },
+  {
+    id: "SHP-402",
+    cargo: "Live Biopsy Reagents",
+    origin: "Hyderabad",
+    dest: "Bengaluru",
+    min: 2,
+    max: 8,
+    status: "Spoiled",
+    spoilCause: "Cargo Container Seal Rupture",
+    spoilNotes: "Vial vacuum seal cracked in rough transit over Hosur highway. Active biohazard containment enforced.",
+    spoilDeclaredBy: "Arnav Pratap Singh (Logistics Manager)",
+    spoilQuarantineStatus: "Hazardous Biohazard Condemnation",
+    spoiledAt: "23/11/2026 09:40",
+    readings: [
+      { temp: 4.1, time: "06:00" },
+      { temp: 16.8, time: "09:00" }
+    ]
   }
 ];
 
@@ -322,6 +355,7 @@ const ALL_VIEWS = [
   "Cancellations",
   "Delivered",
   "Cancelled",
+  "Spoiled",
   "Devices",
   "Reports",
   "Settings"
@@ -334,12 +368,13 @@ const VIEW_METADATA = {
   Cancellations: { title: "Approvals Queue", breadcrumb: "Two-Person Verification & Cancellation Governance" },
   Delivered: { title: "Delivered History", breadcrumb: "Completed Consignments & Compliance Log" },
   Cancelled: { title: "Cancelled Records", breadcrumb: "Terminated Shipments & Operator Approvals Archive" },
+  Spoiled: { title: "Spoiled Cargo", breadcrumb: "Thermal Breach Spoilage & Quarantine Log" },
   Devices: { title: "IoT Device Fleet", breadcrumb: "Hardware Probe Health, RF Signal & Calibration" },
   Reports: { title: "Analytics & Reports", breadcrumb: "Regulatory Compliance Metrics & Audit Downloads" },
   Settings: { title: "Settings & Profile", breadcrumb: "Operator Identity & Telemetry Sensitivity Guidelines" }
 };
 
-const STORAGE_VER = "v5_cancellation_alerts";
+const STORAGE_VER = "v6_spoiled_dark_sso";
 
 /* ---------- Utility Helpers ---------- */
 const $ = id => document.getElementById(id);
@@ -395,7 +430,11 @@ function sanitizeShipment(s, idx) {
   const dest = String(s.dest || s.destination || "Destination Hub").trim();
   const min = typeof s.min === "number" ? s.min : (typeof s.minTemperature === "number" ? s.minTemperature : 2.0);
   const max = typeof s.max === "number" ? s.max : (typeof s.maxTemperature === "number" ? s.maxTemperature : 8.0);
-  const status = s.status === "Delivered" ? "Delivered" : (s.status === "Cancelled" ? "Cancelled" : "Active");
+  
+  let status = "Active";
+  if (s.status === "Delivered") status = "Delivered";
+  else if (s.status === "Cancelled") status = "Cancelled";
+  else if (s.status === "Spoiled") status = "Spoiled";
 
   let readings = [];
   if (Array.isArray(s.readings) && s.readings.length > 0) {
@@ -416,8 +455,26 @@ function sanitizeShipment(s, idx) {
     cancelRequestedBy: s.cancelRequestedBy || "",
     cancelApprovedBy: s.cancelApprovedBy || "",
     cancelledAt: s.cancelledAt || "",
+    spoilCause: s.spoilCause || "",
+    spoilNotes: s.spoilNotes || "",
+    spoilDeclaredBy: s.spoilDeclaredBy || "",
+    spoilQuarantineStatus: s.spoilQuarantineStatus || "Quarantined in Isolator",
+    spoiledAt: s.spoiledAt || "",
     readings
   };
+}
+
+function loadProfiles() {
+  try {
+    const raw = localStorage.getItem("cc_profiles");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return { ...DEFAULT_PROFILES, ...parsed };
+    }
+  } catch (err) {
+    // fallback
+  }
+  return { ...DEFAULT_PROFILES };
 }
 
 function loadInitialState() {
@@ -426,7 +483,7 @@ function loadInitialState() {
     const raw = localStorage.getItem("cc_shipments");
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length >= 10) {
+      if (Array.isArray(parsed) && parsed.length >= 8) {
         loadedShipments = parsed.map((s, idx) => sanitizeShipment(s, idx)).filter(Boolean);
       }
     }
@@ -434,7 +491,7 @@ function loadInitialState() {
     loadedShipments = [];
   }
 
-  if (loadedShipments.length < 10) {
+  if (loadedShipments.length < 8) {
     loadedShipments = INITIAL_SHIPMENTS.map((s, idx) => sanitizeShipment(s, idx));
     localStorage.setItem("cc_shipments", JSON.stringify(loadedShipments));
   }
@@ -483,12 +540,22 @@ let shipments = loadedShipments;
 let alerts = loadedAlerts;
 let cancellations = loadedCancels;
 let managerNotifications = loadedNotifications;
+let PROFILES = loadProfiles();
 let currentUser = loadUser();
 let currentShipmentId = null;
 let currentActiveView = "Dashboard";
 let pendingDeleteShipmentId = null;
 let activeAlertFilter = "ALL";
 let seq = Date.now();
+
+// Responsive Notification Reset Tracker (Requirement 8)
+let unreadAlertCount = 0;
+let unreadCancelCount = 0;
+let hasViewedAlerts = false;
+let hasViewedCancels = false;
+
+// Theme tracker (Requirement 4)
+let currentTheme = localStorage.getItem("cc_theme") || "light";
 
 // Assign unique aid if missing
 alerts.forEach(a => { if (!a.aid) a.aid = "ALT-" + (seq++); });
@@ -527,6 +594,8 @@ function saveState() {
     localStorage.setItem("cc_cancellations", JSON.stringify(cancellations));
     localStorage.setItem("cc_manager_notifications", JSON.stringify(managerNotifications));
     localStorage.setItem("cc_user", JSON.stringify(currentUser ? currentUser.username : null));
+    localStorage.setItem("cc_profiles", JSON.stringify(PROFILES));
+    localStorage.setItem("cc_theme", currentTheme);
     localStorage.setItem("cc_storage_ver", STORAGE_VER);
   } catch (err) {
     console.error("Storage save failed:", err);
@@ -554,7 +623,8 @@ function statusPillHtml(status) {
   const icons = {
     Normal: "bi-shield-check",
     Warning: "bi-exclamation-triangle-fill",
-    Critical: "bi-x-octagon-fill"
+    Critical: "bi-x-octagon-fill",
+    Spoiled: "bi-radioactive"
   };
   return `<span class="status-pill status-pill-${status}"><i class="bi ${icons[status] || 'bi-info-circle'}"></i>${status}</span>`;
 }
@@ -575,7 +645,7 @@ function randomReading(s) {
 
 /* ===================================================================
    MAIN APPLICATION DOM CONTROLLER
-   =================================================================== */
+   ================================================================== */
 document.addEventListener("DOMContentLoaded", () => {
 
   // Global modal dismiss handler
@@ -594,6 +664,28 @@ document.addEventListener("DOMContentLoaded", () => {
     dateEl.textContent = new Date().toLocaleDateString('en-GB', options);
   }
 
+  // Initialize Theme (Requirement 4)
+  function applyTheme(theme) {
+    currentTheme = theme;
+    if (theme === "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+      if ($("themeToggleIcon")) $("themeToggleIcon").className = "bi bi-sun";
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+      if ($("themeToggleIcon")) $("themeToggleIcon").className = "bi bi-moon-stars";
+    }
+    saveState();
+    if (overviewComplianceChartInstance || conditionDoughnutChartInstance) {
+      renderCharts(activeShipments(), 0, 0, 0, true);
+    }
+  }
+
+  applyTheme(currentTheme);
+
+  const toggleTheme = () => applyTheme(currentTheme === "dark" ? "light" : "dark");
+  if ($("btnThemeToggle")) $("btnThemeToggle").onclick = toggleTheme;
+  if ($("btnSettingsThemeToggle")) $("btnSettingsThemeToggle").onclick = toggleTheme;
+
   function runEvaluation() {
     activeShipments().forEach(s => {
       const latest = latestOf(s);
@@ -611,12 +703,42 @@ document.addEventListener("DOMContentLoaded", () => {
           requested: false,
           requestNote: ""
         });
+        if (currentActiveView !== "Alerts") {
+          hasViewedAlerts = false; // new unread alert
+        }
       }
     });
     saveState();
   }
 
-  /* ---------- Authentication State & RBAC Rules ---------- */
+  /* ---------- Authentication State & Profiles ---------- */
+  function updateProfileUI() {
+    if (!currentUser) return;
+    const prof = PROFILES[currentUser.username] || DEFAULT_PROFILES[currentUser.username] || {
+      name: currentUser.name,
+      role: currentUser.role,
+      email: currentUser.email,
+      phone: "—",
+      station: "Polaris School of Technology Bangalore",
+      duty: "Cold-chain supervision",
+      photo: ""
+    };
+
+    $("navUserName").textContent = prof.name;
+    $("welcomeUserName").textContent = prof.name.split(" ")[0];
+    $("userRoleBadge").textContent = prof.role;
+
+    // Render avatar: photo image or initial circle
+    const avatarContainer = $("sidebarAvatarContainer");
+    if (avatarContainer) {
+      if (prof.photo) {
+        avatarContainer.innerHTML = `<img src="${prof.photo}" alt="${esc(prof.name)}" class="profile-avatar-img">`;
+      } else {
+        avatarContainer.innerHTML = `<span id="sidebarAvatarInitial">${prof.name.charAt(0).toUpperCase()}</span>`;
+      }
+    }
+  }
+
   function setAuth(user) {
     currentUser = user;
     saveState();
@@ -624,18 +746,10 @@ document.addEventListener("DOMContentLoaded", () => {
       $("loginSection").classList.add("d-none");
       $("appSection").classList.remove("d-none");
 
-      // Populate user widgets
-      $("navUserName").textContent = user.name;
-      $("welcomeUserName").textContent = user.name;
-      $("userRoleBadge").textContent = user.role;
-      $("sidebarAvatarInitial").textContent = user.name.charAt(0).toUpperCase();
-
-      // Warehouse Operator cancellation badge visibility
-      const isOperator = user.role === "Warehouse Operator";
-      const isManager = user.role === "Logistics Manager";
+      updateProfileUI();
 
       // If manager logs in while on Cancellations view, switch to Dashboard
-      if (!isOperator && currentActiveView === "Cancellations") {
+      if (user.role !== "Warehouse Operator" && currentActiveView === "Cancellations") {
         currentActiveView = "Dashboard";
       }
 
@@ -667,17 +781,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Quick Demo account fill buttons
-  $("fillManagerCreds").onclick = () => {
-    $("loginUsername").value = "Arnav";
-    $("loginPassword").value = "123";
-    $("loginError").classList.add("d-none");
+  // Google Login SSO Integration (Requirement 1)
+  $("btnGoogleLogin").onclick = () => {
+    openModal("googleLoginModal");
   };
 
-  $("fillOperatorCreds").onclick = () => {
-    $("loginUsername").value = "Sourabh";
-    $("loginPassword").value = "123";
-    $("loginError").classList.add("d-none");
+  $("googleAccountArnav").onclick = () => {
+    closeModal("googleLoginModal");
+    setAuth(USERS[0]); // Arnav
+  };
+
+  $("googleAccountSourabh").onclick = () => {
+    closeModal("googleLoginModal");
+    setAuth(USERS[1]); // Sourabh
   };
 
   // Password visibility toggle
@@ -696,24 +812,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   $("btnLogout").onclick = () => setAuth(null);
 
-  // Quick switch role modal
-  $("btnQuickSwitchRole").onclick = () => openModal("switchRoleModal");
-  if ($("btnSettingsSwitchRole")) {
-    $("btnSettingsSwitchRole").onclick = () => openModal("switchRoleModal");
-  }
-
-  $("switchCardArnav").onclick = () => {
-    const arnav = USERS.find(u => u.username === "Arnav");
-    if (arnav) setAuth(arnav);
-    closeModal("switchRoleModal");
-  };
-
-  $("switchCardSourabh").onclick = () => {
-    const sourabh = USERS.find(u => u.username === "Sourabh");
-    if (sourabh) setAuth(sourabh);
-    closeModal("switchRoleModal");
-  };
-
   /* ---------- Mobile Drawer Sidebar ---------- */
   const sidebar = $("appSidebar");
   const overlay = $("mobileOverlay");
@@ -730,37 +828,142 @@ document.addEventListener("DOMContentLoaded", () => {
     overlay.classList.remove("active");
   };
 
-  /* ---------- Single Profile Modal ---------- */
+  /* ---------- Responsive Editable Profile Management (Requirement 2) ---------- */
   function openUserProfileModal() {
     if (!currentUser) return;
-    const profile = PROFILES[currentUser.username] || {
-      name: currentUser.name,
-      role: currentUser.role,
-      duty: "OJT project under Kshitij sir",
-      details: { "Email": `${currentUser.username.toLowerCase()}@coldchain.io` }
-    };
+    const prof = PROFILES[currentUser.username] || DEFAULT_PROFILES[currentUser.username];
 
-    $("profModalName").textContent = profile.name;
-    $("profModalRole").textContent = profile.role;
-    $("profModalDuty").textContent = profile.duty;
+    $("profModalName").textContent = prof.name;
+    $("profModalRole").textContent = prof.role;
+    $("profModalDuty").textContent = prof.duty || "Cold-chain logistics governance";
+
+    // Set Avatar in Modal
+    const modalAvatar = $("modalProfileAvatar");
+    if (modalAvatar) {
+      modalAvatar.src = prof.photo || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(prof.name)}`;
+    }
 
     const detailsList = $("profModalDetailsList");
-    if (detailsList && profile.details) {
-      detailsList.innerHTML = Object.keys(profile.details).map(label => `
-        <dt class="col-5 text-secondary fw-semibold mb-2">${esc(label)}</dt>
-        <dd class="col-7 mb-2 text-dark font-monospace">${esc(profile.details[label] || "—")}</dd>
-      `).join("");
+    if (detailsList) {
+      detailsList.innerHTML = `
+        <dt class="col-4 text-secondary fw-semibold mb-2">Email</dt>
+        <dd class="col-8 mb-2 text-dark font-monospace">${esc(prof.email || "—")}</dd>
+        <dt class="col-4 text-secondary fw-semibold mb-2">Phone</dt>
+        <dd class="col-8 mb-2 text-dark font-monospace">${esc(prof.phone || "—")}</dd>
+        <dt class="col-4 text-secondary fw-semibold mb-2">Station / Hub</dt>
+        <dd class="col-8 mb-2 text-dark font-monospace">${esc(prof.station || "—")}</dd>
+      `;
     }
+
+    // Reset to view mode
+    $("profileViewMode").classList.remove("d-none");
+    $("modalProfileEditForm").classList.add("d-none");
 
     openModal("userProfileModal");
   }
 
   $("userProfileChip").onclick = openUserProfileModal;
 
-  /* ---------- Master Navigation Switcher ---------- */
+  // Toggle edit profile mode inside modal
+  $("btnToggleProfileEdit").onclick = () => {
+    const prof = PROFILES[currentUser.username] || DEFAULT_PROFILES[currentUser.username];
+    $("modalEditName").value = prof.name;
+    $("modalEditEmail").value = prof.email;
+    $("modalEditPhone").value = prof.phone || "";
+    $("modalEditStation").value = prof.station || "";
+    $("modalEditAvatarPreview").src = prof.photo || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(prof.name)}`;
+
+    $("profileViewMode").classList.add("d-none");
+    $("modalProfileEditForm").classList.remove("d-none");
+  };
+
+  $("btnCancelProfileEdit").onclick = () => {
+    $("profileViewMode").classList.remove("d-none");
+    $("modalProfileEditForm").classList.add("d-none");
+  };
+
+  // Photo upload handling (FileReader to base64)
+  function handlePhotoUpload(fileInput, previewImgElement, targetUsername) {
+    const file = fileInput.files && fileInput.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target.result;
+        previewImgElement.src = dataUrl;
+        if (PROFILES[targetUsername]) {
+          PROFILES[targetUsername].photo = dataUrl;
+          saveState();
+          updateProfileUI();
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  $("modalPhotoUpload").onchange = (e) => {
+    if (currentUser) handlePhotoUpload(e.target, $("modalEditAvatarPreview"), currentUser.username);
+  };
+
+  $("settingsPhotoUpload").onchange = (e) => {
+    if (currentUser) handlePhotoUpload(e.target, $("settingsAvatarPreview"), currentUser.username);
+  };
+
+  // Save profile from Modal
+  $("modalProfileEditForm").onsubmit = (e) => {
+    e.preventDefault();
+    if (!currentUser) return;
+
+    const prof = PROFILES[currentUser.username] || { ...DEFAULT_PROFILES[currentUser.username] };
+    prof.name = $("modalEditName").value.trim();
+    prof.email = $("modalEditEmail").value.trim();
+    prof.phone = $("modalEditPhone").value.trim();
+    prof.station = $("modalEditStation").value.trim();
+    currentUser.name = prof.name;
+    currentUser.email = prof.email;
+
+    PROFILES[currentUser.username] = prof;
+    saveState();
+    updateProfileUI();
+    openUserProfileModal(); // Refresh modal view
+  };
+
+  // Save profile from Settings view
+  $("settingsProfileForm").onsubmit = (e) => {
+    e.preventDefault();
+    if (!currentUser) return;
+
+    const prof = PROFILES[currentUser.username] || { ...DEFAULT_PROFILES[currentUser.username] };
+    prof.name = $("settingsNameInput").value.trim();
+    prof.email = $("settingsEmailInput").value.trim();
+    prof.phone = $("settingsPhoneInput").value.trim();
+    prof.station = $("settingsStationInput").value.trim();
+    prof.duty = $("settingsDutyInput").value.trim();
+    currentUser.name = prof.name;
+    currentUser.email = prof.email;
+
+    PROFILES[currentUser.username] = prof;
+    saveState();
+    updateProfileUI();
+    alert("Profile settings saved successfully!");
+  };
+
+  /* ---------- Master Navigation Switcher & Responsive Badge Reset (Requirement 8) ---------- */
   function switchView(name) {
     if (!ALL_VIEWS.includes(name)) name = "Dashboard";
+
+    // Requirement 8: When leaving Alert section or Cancellations section, reset badge to zero!
+    if (currentActiveView === "Alerts" && name !== "Alerts") {
+      hasViewedAlerts = true;
+    }
+    if (currentActiveView === "Cancellations" && name !== "Cancellations") {
+      hasViewedCancels = true;
+    }
+
     currentActiveView = name;
+
+    // If currently ON the section, mark as viewed so leaving resets it
+    if (name === "Alerts") hasViewedAlerts = true;
+    if (name === "Cancellations") hasViewedCancels = true;
 
     // Close mobile sidebar if open
     sidebar.classList.remove("mobile-open");
@@ -795,17 +998,44 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ---------- Master Render Pipeline ---------- */
   function renderAll() {
     runEvaluation();
+    updateBadges();
     renderOverview();
     renderShipmentsTable();
     renderAlerts();
     renderRequests();
     renderDelivered();
     renderCancelled();
+    renderSpoiled();
     renderDevices();
     renderSettings();
   }
 
-  /* ---------- Manager Notifications Banner ---------- */
+  /* ---------- Responsive Notification Badge Logic (Requirement 8) ---------- */
+  function updateBadges() {
+    // 1. Alerts Badge: If user viewed Alerts and is on another section, show 0!
+    const activeAlertsCount = alerts.filter(a => a.state !== "Resolved").length;
+    if (hasViewedAlerts && currentActiveView !== "Alerts") {
+      $("navAlertsBadge").textContent = "0";
+    } else {
+      $("navAlertsBadge").textContent = activeAlertsCount;
+    }
+
+    // 2. Cancellation Queue Badge: If viewed and not on Cancellations, show 0!
+    const pendingCancelCount = cancellations.filter(c => c.state === "Pending").length;
+    if (hasViewedCancels && currentActiveView !== "Cancellations") {
+      $("navCancelBadge").textContent = "0";
+    } else {
+      $("navCancelBadge").textContent = pendingCancelCount;
+    }
+
+    // 3. Other section badges
+    $("sidebarShipmentsBadge").textContent = activeShipments().length;
+    $("navDeliveredBadge").textContent = shipments.filter(s => s.status === "Delivered").length;
+    $("navCancelledBadge").textContent = shipments.filter(s => s.status === "Cancelled").length;
+    $("navSpoiledBadge").textContent = shipments.filter(s => s.status === "Spoiled").length;
+  }
+
+  /* ---------- Manager Notifications Banner (Clean Card) ---------- */
   function renderManagerNotifications() {
     const container = $("managerNotificationsContainer");
     if (!container) return;
@@ -817,12 +1047,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     container.innerHTML = `
-      <div class="card border-0 shadow-sm mb-4" style="background: #FFFBFB; border: 1px solid #FECACA !important; border-radius: var(--cc-radius-md);">
-        <div class="card-header bg-white py-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom: 1px solid #FECACA;">
-          <div class="fw-bold text-danger d-flex align-items-center gap-2 small">
-            <i class="bi bi-bell-fill fs-6"></i>
+      <div class="card border-0 shadow-sm mb-4" style="background: var(--cc-card-bg); border: 1px solid var(--cc-border) !important; border-radius: var(--cc-radius-md);">
+        <div class="card-header bg-card py-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom: 1px solid var(--cc-border);">
+          <div class="fw-bold text-dark d-flex align-items-center gap-2 small">
+            <i class="bi bi-bell-fill text-primary fs-6"></i>
             <span>Warehouse Operator Cancellation Decisions Dispatch</span>
-            <span class="badge bg-danger rounded-pill">${managerNotifications.length}</span>
+            <span class="badge bg-primary rounded-pill">${managerNotifications.length}</span>
           </div>
           <button class="btn btn-sm btn-link text-decoration-none text-muted py-0 small" onclick="clearAllManagerNotifications()">
             <i class="bi bi-check2-all me-1"></i>Dismiss All
@@ -882,7 +1112,6 @@ document.addEventListener("DOMContentLoaded", () => {
     $("statNormal").textContent = normal;
     $("statWarning").textContent = warn;
     $("statCritical").textContent = crit;
-    $("sidebarShipmentsBadge").textContent = active.length;
 
     // Quick Freight Snapshot Table (First 5 active packages)
     const quickRows = active.slice(0, 5).map(s => {
@@ -908,14 +1137,17 @@ document.addEventListener("DOMContentLoaded", () => {
     $("dashboardQuickTableBody").innerHTML = quickRows.join("") ||
       `<tr><td colspan="7" class="text-center text-muted py-3">No active refrigerated freight registered.</td></tr>`;
 
-    // Render Overview Charts
     renderCharts(active, normal, warn, crit);
   }
 
-  function renderCharts(active, normal, warn, crit) {
+  function renderCharts(active, normal, warn, crit, forceUpdate = false) {
     if (!window.Chart) return;
 
-    // 1. Temperature Compliance Chart (Line/Bar across packages)
+    const isDark = currentTheme === "dark";
+    const gridColor = isDark ? "#334155" : "#F1F5F9";
+    const textColor = isDark ? "#94A3B8" : "#64748B";
+
+    // 1. Temperature Compliance Chart
     const ctxOverview = document.getElementById("overviewComplianceChart");
     if (ctxOverview) {
       const labels = active.map(s => s.id);
@@ -933,10 +1165,10 @@ document.addEventListener("DOMContentLoaded", () => {
           labels,
           datasets: [
             {
-              label: "Current Sensor Reading (°C)",
+              label: "Current Reading (°C)",
               data: currentTemps,
               borderColor: "#3478F6",
-              backgroundColor: "rgba(52, 120, 246, 0.1)",
+              backgroundColor: "rgba(52, 120, 246, 0.15)",
               borderWidth: 2.5,
               tension: 0.3,
               pointRadius: 5,
@@ -969,21 +1201,23 @@ document.addEventListener("DOMContentLoaded", () => {
           plugins: {
             legend: {
               position: "top",
-              labels: { font: { family: "Inter", size: 11 }, boxWidth: 12 }
+              labels: { font: { family: "Inter", size: 11 }, color: textColor, boxWidth: 12 }
             },
             tooltip: {
-              backgroundColor: "#0F172A",
+              backgroundColor: isDark ? "#1E293B" : "#0F172A",
               titleFont: { family: "Inter" },
               bodyFont: { family: "Inter" }
             }
           },
           scales: {
             y: {
-              title: { display: true, text: "Degrees Celsius (°C)", font: { family: "Inter", size: 10 } },
-              grid: { color: "#F1F5F9" }
+              title: { display: true, text: "Degrees Celsius (°C)", font: { family: "Inter", size: 10 }, color: textColor },
+              grid: { color: gridColor },
+              ticks: { color: textColor }
             },
             x: {
-              grid: { display: false }
+              grid: { display: false },
+              ticks: { color: textColor }
             }
           }
         }
@@ -999,7 +1233,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const total = normal + warn + crit;
       const normalPct = total > 0 ? Math.round((normal / total) * 100) : 100;
-      $("conditionDoughnutSummary").innerHTML = `<strong>${normalPct}%</strong> of active fleet is within strictly compliant safe bounds.`;
+      $("conditionDoughnutSummary").innerHTML = `<strong>${normalPct}%</strong> of active freight is within safe bounds.`;
 
       conditionDoughnutChartInstance = new Chart(ctxDoughnut, {
         type: "doughnut",
@@ -1010,7 +1244,7 @@ document.addEventListener("DOMContentLoaded", () => {
               data: [normal, warn, crit],
               backgroundColor: ["#17845D", "#B7791F", "#C2413B"],
               borderWidth: 2,
-              borderColor: "#FFFFFF"
+              borderColor: isDark ? "#1E293B" : "#FFFFFF"
             }
           ]
         },
@@ -1021,7 +1255,7 @@ document.addEventListener("DOMContentLoaded", () => {
           plugins: {
             legend: {
               position: "bottom",
-              labels: { font: { family: "Inter", size: 11 }, boxWidth: 10 }
+              labels: { font: { family: "Inter", size: 11 }, color: textColor, boxWidth: 10 }
             }
           }
         }
@@ -1042,14 +1276,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const latest = latestOf(s);
       const cond = evaluateTemp(latest.temp, s.min, s.max);
 
-      // Search match
       const matchSearch = (s.id + " " + s.cargo + " " + s.origin + " " + s.dest).toLowerCase().includes(q);
       if (!matchSearch) return false;
 
-      // Status match
       if (statusFilter !== "ALL" && cond.status !== statusFilter) return false;
 
-      // Cargo category match
       if (cargoFilter === "Vaccines" && !s.cargo.toLowerCase().includes("vaccine") && !s.cargo.toLowerCase().includes("biologics")) return false;
       if (cargoFilter === "Produce" && !s.cargo.toLowerCase().includes("produce") && !s.cargo.toLowerCase().includes("chocolates")) return false;
       if (cargoFilter === "Dairy" && !s.cargo.toLowerCase().includes("dairy") && !s.cargo.toLowerCase().includes("seafood") && !s.cargo.toLowerCase().includes("poultry")) return false;
@@ -1066,12 +1297,20 @@ document.addEventListener("DOMContentLoaded", () => {
       const cond = evaluateTemp(latest.temp, s.min, s.max);
       const hasPendingCancel = cancellations.some(c => c.shipmentId === s.id && c.state === "Pending");
 
-      // Action buttons based on Role-Based Access Control
       let actionButtons = `
         <button class="btn btn-sm btn-crm-outline py-0" onclick="showDetails('${s.id}')" title="View Diagnostics & Telemetry Chart">
           Diagnostics
         </button>
       `;
+
+      // Declare Spoiled option for critical/high excursions (Requirement 6)
+      if (cond.status === "Critical") {
+        actionButtons += `
+          <button class="btn btn-sm btn-outline-danger py-0 ms-1" onclick="openDeclareSpoiledModal('${s.id}')" title="Quarantine / Declare Spoiled">
+            <i class="bi bi-radioactive"></i>
+          </button>
+        `;
+      }
 
       // Mark Delivered ONLY for Warehouse Operator
       if (isOperator) {
@@ -1130,15 +1369,11 @@ document.addEventListener("DOMContentLoaded", () => {
       `<tr><td colspan="7" class="text-center text-muted py-4">No active shipments match the selected filters.</td></tr>`;
   }
 
-  /* ---------- Alert Center View ---------- */
+  /* ---------- Alert Center View with Dual-Role Notifications (Requirement 7) ---------- */
   function renderAlerts() {
-    const unresolved = alerts.filter(a => a.state !== "Resolved").length;
-    $("navAlertsBadge").textContent = unresolved;
-
-    // Filter counts
     const criticalCount = alerts.filter(a => a.status === "Critical" && a.state !== "Resolved").length;
     const warningCount = alerts.filter(a => a.status === "Warning" && a.state !== "Resolved").length;
-    const requestCount = alerts.filter(a => a.requested && a.state !== "Resolved").length;
+    const requestCount = alerts.filter(a => (a.requested || a.type === "NewShipment") && a.state !== "Resolved").length;
     const resolvedCount = alerts.filter(a => a.state === "Resolved").length;
 
     $("alertStatCritical").textContent = criticalCount;
@@ -1158,7 +1393,42 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     $("alertsList").innerHTML = filteredAlerts.map(a => {
-      // 1. Cancellation Decision Notice (Operator Approved/Rejected)
+      // 1. New Consignment Dispatch Notice (Requirement 7 - visible to both roles!)
+      if (a.type === "NewShipment") {
+        return `
+          <div class="alert-card-v2 NewShipment">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+              <div class="d-flex align-items-start gap-3">
+                <i class="bi bi-box-arrow-in-right text-primary fs-4 mt-1"></i>
+                <div>
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    <strong class="fs-6 font-monospace text-dark">${esc(a.id)}</strong>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">New Consignment</span>
+                    <span class="badge ${a.state === 'Resolved' ? 'bg-secondary' : 'bg-success'}">${a.state === 'Resolved' ? 'Acknowledged' : 'Active Notice'}</span>
+                  </div>
+                  <div class="fw-semibold text-primary mb-1">${esc(a.title)}</div>
+                  <div class="text-dark small mb-1">${esc(a.message)}</div>
+                  <div class="small text-muted">
+                    <i class="bi bi-broadcast me-1"></i>Telemetry started at: <strong>${esc(a.time)}</strong> | Dispatched by: <strong>${esc(a.resolvedBy || "System")}</strong>
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex align-items-center gap-1">
+                ${a.state !== "Resolved" ? `
+                  <button class="btn btn-sm btn-crm-outline" onclick="acknowledgeAlert('${a.aid}')">
+                    <i class="bi bi-check2 me-1"></i>Acknowledge
+                  </button>
+                ` : '<span class="badge bg-secondary">Read</span>'}
+                <button class="btn btn-sm btn-outline-danger py-1" onclick="deleteAlert('${a.aid}')" title="Delete Notice">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 2. Cancellation Decision Notice
       if (a.type === "Cancellation") {
         const isApproved = a.decision === "Approved";
         return `
@@ -1195,14 +1465,14 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
       }
 
-      // 2. Standard Temperature Excursion Alert
+      // 3. Standard Temperature Excursion Alert
       const isResolved = a.state === "Resolved";
 
       const managerNotificationHtml = (isManager && a.requested && !isResolved) ? `
         <div class="alert alert-warning py-2 px-3 my-2 small d-flex align-items-center gap-2 border-warning rounded-3">
           <i class="bi bi-envelope-exclamation-fill text-danger fs-5"></i>
           <div>
-            <strong>Warehouse Operator Request Received:</strong> Package is in <span class="text-danger fw-bold">${esc(a.status)}</span> condition. Immediate regulation requested.
+            <strong>Warehouse Operator Notice:</strong> Package is in <span class="text-danger fw-bold">${esc(a.status)}</span> condition. Immediate regulation requested.
           </div>
         </div>
       ` : "";
@@ -1219,7 +1489,7 @@ document.addEventListener("DOMContentLoaded", () => {
           } else {
             actionControlHtml = `
               <span class="badge bg-warning text-dark border p-2">
-                <i class="bi bi-check2-circle me-1"></i>Request Dispatched to Manager
+                <i class="bi bi-check2-circle me-1"></i>Request Dispatched
               </span>
             `;
           }
@@ -1302,12 +1572,12 @@ document.addEventListener("DOMContentLoaded", () => {
     a.requestNote = `Package is in ${a.status} condition, please resolve it.`;
     saveState();
     renderAll();
-    alert(`Request dispatched to Logistics Manager: Consignment ${a.id} is in ${a.status} condition. Immediate regulation required.`);
+    alert(`Notice sent to Logistics Manager: Consignment ${a.id} is in ${a.status} condition.`);
   };
 
   $("btnDeleteAllAlerts").onclick = () => {
     if (!alerts.length) return alert("No active alerts to delete.");
-    if (confirm(`Are you sure you want to clear all ${alerts.length} incident alerts?`)) {
+    if (confirm(`Are you sure you want to clear all ${alerts.length} incident notices?`)) {
       alerts.forEach(a => {
         const shipment = shipments.find(s => s.id === a.id);
         const reading = shipment && shipment.readings && shipment.readings.find(r => r.time === a.time && r.temp === a.temp);
@@ -1321,7 +1591,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.deleteAlert = (aid) => {
     const a = alerts.find(item => item.aid === aid);
-    if (!a || !confirm(`Permanently remove alert record ${a.aid}?`)) return;
+    if (!a || !confirm(`Remove alert record ${a.aid}?`)) return;
     const shipment = shipments.find(s => s.id === a.id);
     const reading = shipment && shipment.readings && shipment.readings.find(r => r.time === a.time && r.temp === a.temp);
     if (reading) reading.alertDeleted = true;
@@ -1333,7 +1603,6 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ---------- Cancellation Approvals Queue ---------- */
   function renderRequests() {
     const pending = cancellations.filter(c => c.state === "Pending").length;
-    $("navCancelBadge").textContent = pending;
     $("pendingCancelBadge").textContent = `${pending} Pending Decisions`;
 
     const isOperator = currentUser && currentUser.role === "Warehouse Operator";
@@ -1344,7 +1613,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const badgeClass = isPending ? "bg-warning text-dark" : (isApproved ? "bg-success" : "bg-danger");
 
       return `
-        <div class="alert-card-v2 mb-3 bg-white ${isApproved ? 'border-success' : (isPending ? 'border-warning' : 'border-danger')}">
+        <div class="alert-card-v2 mb-3 bg-card ${isApproved ? 'border-success' : (isPending ? 'border-warning' : 'border-danger')}">
           <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
             <div>
               <div class="d-flex align-items-center gap-2 mb-2">
@@ -1383,7 +1652,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const req = cancellations.find(c => c.id === reqId);
     if (!req) return;
 
-    const opName = currentUser ? currentUser.name : "Sourabh";
+    const opName = currentUser ? currentUser.name : "Sourabh Verma";
     const s = shipments.find(item => item.id === req.shipmentId);
 
     if (approved) {
@@ -1400,7 +1669,6 @@ document.addEventListener("DOMContentLoaded", () => {
         s.cancelledAt = stamp();
       }
 
-      // Close active temp alerts for this cancelled shipment
       alerts = alerts.filter(a => !(a.id === req.shipmentId && a.type !== "Cancellation" && a.state !== "Resolved"));
 
       alerts.unshift({
@@ -1412,7 +1680,7 @@ document.addEventListener("DOMContentLoaded", () => {
         status: "Approved",
         state: "Active",
         title: `Cancellation Request Approved: ${req.shipmentId}`,
-        message: `Your cancellation request for consignment ${req.shipmentId}${s ? ` (${s.cargo})` : ""} was APPROVED by Warehouse Operator (${opName}). Package has been archived under Cancelled Records.`,
+        message: `Cancellation for consignment ${req.shipmentId}${s ? ` (${s.cargo})` : ""} was APPROVED by Warehouse Operator (${opName}). Package moved to Cancelled Records.`,
         time: stamp(),
         resolvedBy: `${opName} (Warehouse Operator)`
       });
@@ -1422,11 +1690,11 @@ document.addEventListener("DOMContentLoaded", () => {
         shipmentId: req.shipmentId,
         type: "Approved",
         title: `Cancellation Approved: ${req.shipmentId}`,
-        message: `Cancellation for consignment ${req.shipmentId}${s ? ` (${s.cargo})` : ""} was APPROVED by Warehouse Operator (${opName}). Package moved to Cancelled tab.`,
+        message: `Cancellation for consignment ${req.shipmentId}${s ? ` (${s.cargo})` : ""} was APPROVED by Warehouse Operator (${opName}).`,
         time: stamp()
       });
 
-      alert(`Cancellation request for ${req.shipmentId} APPROVED.\nAudit trail updated and Logistics Manager notified.`);
+      alert(`Cancellation request for ${req.shipmentId} APPROVED.`);
     } else {
       req.state = "Rejected";
       req.resolvedBy = `${opName} (Warehouse Operator)`;
@@ -1441,7 +1709,7 @@ document.addEventListener("DOMContentLoaded", () => {
         status: "Rejected",
         state: "Active",
         title: `Cancellation Request Rejected: ${req.shipmentId}`,
-        message: `Your cancellation request for consignment ${req.shipmentId}${s ? ` (${s.cargo})` : ""} was REJECTED by Warehouse Operator (${opName}). Package remains Active in transit.`,
+        message: `Cancellation for consignment ${req.shipmentId}${s ? ` (${s.cargo})` : ""} was REJECTED by Warehouse Operator (${opName}). Package remains Active in transit.`,
         time: stamp(),
         resolvedBy: `${opName} (Warehouse Operator)`
       });
@@ -1451,11 +1719,11 @@ document.addEventListener("DOMContentLoaded", () => {
         shipmentId: req.shipmentId,
         type: "Rejected",
         title: `Cancellation Rejected: ${req.shipmentId}`,
-        message: `Cancellation request for package ${req.shipmentId} was REJECTED by Warehouse Operator (${opName}). Package remains Active.`,
+        message: `Cancellation request for package ${req.shipmentId} was REJECTED by Warehouse Operator (${opName}).`,
         time: stamp()
       });
 
-      alert(`Cancellation request for ${req.shipmentId} REJECTED.\nLogistics Manager has been notified.`);
+      alert(`Cancellation request for ${req.shipmentId} REJECTED.`);
     }
 
     saveState();
@@ -1465,7 +1733,6 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ---------- Delivered Section ---------- */
   function renderDelivered() {
     const list = shipments.filter(s => s.status === "Delivered");
-    $("navDeliveredBadge").textContent = list.length;
     $("deliveredBody").innerHTML = list.map(s => `
       <tr>
         <td class="fw-bold font-monospace text-primary"><i class="bi bi-check2-circle text-success me-1"></i>${esc(s.id)}</td>
@@ -1488,7 +1755,6 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ---------- Cancelled Section ---------- */
   function renderCancelled() {
     const list = shipments.filter(s => s.status === "Cancelled");
-    $("navCancelledBadge").textContent = list.length;
     $("cancelledBody").innerHTML = list.map(s => `
       <tr>
         <td class="fw-bold font-monospace text-danger text-decoration-line-through">${esc(s.id)}</td>
@@ -1497,7 +1763,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td class="fw-semibold text-danger">${esc(s.cancelReason || "—")}</td>
         <td class="small fst-italic text-muted">${esc(s.cancelNotes || "—")}</td>
         <td class="small text-muted">${esc(s.cancelRequestedBy || "—")}</td>
-        <td class="small text-success fw-semibold">${esc(s.cancelApprovedBy || "Sourabh (Warehouse Operator)")}</td>
+        <td class="small text-success fw-semibold">${esc(s.cancelApprovedBy || "Sourabh Verma")}</td>
         <td class="small text-muted">${esc(s.cancelledAt || "—")}</td>
         <td class="text-end">
           <button class="btn btn-sm btn-crm-outline py-0" onclick="showDetails('${s.id}')">Diagnostics</button>
@@ -1510,7 +1776,86 @@ document.addEventListener("DOMContentLoaded", () => {
       </tr>`).join("") || `<tr><td colspan="9" class="text-center text-muted py-4">No cancelled consignments recorded.</td></tr>`;
   }
 
-  /* ---------- IoT Device Fleet Module (New V2.0) ---------- */
+  /* ---------- Spoiled Cargo Section (Requirement 6) ---------- */
+  function renderSpoiled() {
+    const list = shipments.filter(s => s.status === "Spoiled");
+    $("spoiledCountTotal").textContent = list.length;
+    $("spoiledBody").innerHTML = list.map(s => {
+      const peakReading = s.readings.reduce((max, r) => r.temp > max ? r.temp : max, s.readings[0] ? s.readings[0].temp : 0);
+      return `
+        <tr>
+          <td class="fw-bold font-monospace text-danger"><i class="bi bi-radioactive me-1"></i>${esc(s.id)}</td>
+          <td><strong>${esc(s.cargo)}</strong></td>
+          <td class="small text-muted">${esc(s.origin)} <i class="bi bi-arrow-right text-muted mx-1"></i> ${esc(s.dest)}</td>
+          <td class="small font-monospace text-danger">Allowed: ${s.min} to ${s.max}°C (Peak: +${peakReading}°C)</td>
+          <td class="small fw-semibold text-danger">${esc(s.spoilCause || "Severe Excursion")}</td>
+          <td class="small text-muted">${esc(s.spoilDeclaredBy || "Inspection Team")}</td>
+          <td><span class="status-pill status-pill-Spoiled">${esc(s.spoilQuarantineStatus || "Quarantined")}</span></td>
+          <td class="small text-muted">${esc(s.spoiledAt || "—")}</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-crm-outline py-0" onclick="showDetails('${s.id}')">Diagnostics</button>
+            ${currentUser && currentUser.role === "Logistics Manager" ? `
+              <button class="btn btn-sm btn-outline-danger py-0 ms-1" onclick="promptDeleteShipment('${s.id}')" title="Delete record">
+                <i class="bi bi-trash"></i>
+              </button>
+            ` : ""}
+          </td>
+        </tr>
+      `;
+    }).join("") || `<tr><td colspan="9" class="text-center text-muted py-4">No spoiled cargo recorded in quarantine log.</td></tr>`;
+  }
+
+  window.openDeclareSpoiledModal = (id) => {
+    const s = shipments.find(item => item.id === id);
+    if (!s) return;
+    $("spoilTargetShipmentId").value = s.id;
+    $("spoilTargetLabel").textContent = `${s.id} (${s.cargo})`;
+    $("spoilNotes").value = "";
+    openModal("declareSpoiledModal");
+  };
+
+  $("declareSpoiledForm").onsubmit = (e) => {
+    e.preventDefault();
+    const id = $("spoilTargetShipmentId").value;
+    const s = shipments.find(item => item.id === id);
+    if (!s) return;
+
+    const cause = $("spoilCauseSelect").value;
+    const status = $("spoilQuarantineStatus").value;
+    const notes = $("spoilNotes").value.trim();
+    const declaredBy = currentUser ? `${currentUser.name} (${currentUser.role})` : "Inspection Officer";
+
+    s.status = "Spoiled";
+    s.spoilCause = cause;
+    s.spoilQuarantineStatus = status;
+    s.spoilNotes = notes;
+    s.spoilDeclaredBy = declaredBy;
+    s.spoiledAt = stamp();
+
+    // Close any active alerts for this package
+    alerts = alerts.filter(a => !(a.id === id && a.state !== "Resolved"));
+
+    // Add entry to alerts so team is notified
+    alerts.unshift({
+      aid: "ALT-SPOIL-" + (seq++),
+      id: s.id,
+      cargo: s.cargo,
+      type: "Spoiled",
+      status: "Critical",
+      state: "Active",
+      title: `Consignment Declared Spoiled: ${s.id}`,
+      message: `Consignment ${s.id} (${s.cargo}) has been condemned due to "${cause}" and transferred to ${status}.`,
+      time: stamp(),
+      resolvedBy: declaredBy
+    });
+
+    closeModal("declareSpoiledModal");
+    saveState();
+    renderAll();
+    alert(`Consignment ${s.id} has been moved to Spoiled Cargo quarantine archive.`);
+  };
+
+  /* ---------- IoT Device Fleet Module ---------- */
   function renderDevices() {
     const grid = $("deviceFleetGrid");
     if (!grid) return;
@@ -1520,8 +1865,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const sensorId = `SEN-T${101 + idx}`;
       const latest = latestOf(s);
       const cond = evaluateTemp(latest.temp, s.min, s.max);
-      const battery = 88 - (idx * 4); // Simulated healthy battery levels
-      const signal = -64 - (idx * 3); // Simulated strong RF signal in dBm
+      const battery = 88 - (idx * 4);
+      const signal = -64 - (idx * 3);
 
       return `
         <div class="col-12 col-md-6 col-lg-3">
@@ -1530,7 +1875,7 @@ document.addEventListener("DOMContentLoaded", () => {
               <span class="fw-bold font-monospace text-primary">${sensorId}</span>
               <span class="badge bg-success-subtle text-success border border-success"><i class="bi bi-wifi me-1"></i>Online</span>
             </div>
-            <div class="small text-muted mb-2">Associated Cargo: <strong>${esc(s.cargo)}</strong> (${esc(s.id)})</div>
+            <div class="small text-muted mb-2">Cargo: <strong>${esc(s.cargo)}</strong> (${esc(s.id)})</div>
             <div class="d-flex justify-content-between small text-muted mb-1">
               <span>Battery: <strong>${battery}%</strong></span>
               <span>RF: <strong>${signal} dBm</strong></span>
@@ -1548,29 +1893,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }).join("");
   }
 
-  /* ---------- Settings & Profile View (New V2.0) ---------- */
+  /* ---------- Settings & Profile View (Requirement 2) ---------- */
   function renderSettings() {
     if (!currentUser) return;
-    const profile = PROFILES[currentUser.username] || {
-      name: currentUser.name,
-      role: currentUser.role,
-      duty: "Cold-chain governance and logistics supervision",
-      details: { "Email": `${currentUser.username.toLowerCase()}@coldchain.io` }
-    };
+    const prof = PROFILES[currentUser.username] || DEFAULT_PROFILES[currentUser.username];
 
-    if ($("settingsProfileName")) $("settingsProfileName").textContent = profile.name;
-    if ($("settingsProfileRole")) $("settingsProfileRole").textContent = profile.role;
-
-    const detailsList = $("settingsProfileDetails");
-    if (detailsList && profile.details) {
-      detailsList.innerHTML = Object.keys(profile.details).map(label => `
-        <dt class="col-5 text-secondary fw-semibold mb-2">${esc(label)}</dt>
-        <dd class="col-7 mb-2 text-dark font-monospace">${esc(profile.details[label] || "—")}</dd>
-      `).join("");
+    if ($("settingsNameInput")) $("settingsNameInput").value = prof.name;
+    if ($("settingsEmailInput")) $("settingsEmailInput").value = prof.email;
+    if ($("settingsPhoneInput")) $("settingsPhoneInput").value = prof.phone || "";
+    if ($("settingsStationInput")) $("settingsStationInput").value = prof.station || "";
+    if ($("settingsDutyInput")) $("settingsDutyInput").value = prof.duty || "";
+    if ($("settingsAvatarPreview")) {
+      $("settingsAvatarPreview").src = prof.photo || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(prof.name)}`;
     }
   }
 
-  /* ---------- CSV Export Functionality (New V2.0) ---------- */
+  /* ---------- CSV Export Functionality ---------- */
   function exportToCSV(filename, rows) {
     const processRow = row => row.map(val => {
       let v = String(val ?? "");
@@ -1588,7 +1926,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.removeChild(link);
   }
 
-  // Bind Export Buttons
   if ($("btnExportShipmentsCSV")) {
     $("btnExportShipmentsCSV").onclick = () => {
       const headers = ["Shipment ID", "Cargo", "Origin", "Destination", "Min Temp (°C)", "Max Temp (°C)", "Latest Temp (°C)", "Status"];
@@ -1621,6 +1958,17 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  if ($("btnExportSpoiledCSV")) {
+    $("btnExportSpoiledCSV").onclick = () => {
+      const headers = ["Consignment ID", "Cargo", "Route", "Safe Limits", "Spoilage Cause", "Declared By", "Quarantine Status", "Spoiled At"];
+      const list = shipments.filter(s => s.status === "Spoiled");
+      const rows = [headers, ...list.map(s => [
+        s.id, s.cargo, `${s.origin} -> ${s.dest}`, `${s.min}°C to ${s.max}°C`, s.spoilCause, s.spoilDeclaredBy, s.spoilQuarantineStatus, s.spoiledAt
+      ])];
+      exportToCSV(`coldchain_spoiled_quarantine_log_${Date.now()}.csv`, rows);
+    };
+  }
+
   if ($("btnDownloadFullAudit")) {
     $("btnDownloadFullAudit").onclick = () => {
       const headers = ["Record Type", "ID", "Cargo", "Route", "Telemetry", "Decision / State", "Audit Timestamp"];
@@ -1638,7 +1986,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  /* ---------- Resolve Modal (Logistics Manager Regulate Temp) ---------- */
+  /* ---------- Resolve Modal (Manager Regulate Temp) ---------- */
   window.openResolveModal = (aid) => {
     const alertItem = alerts.find(a => a.aid === aid && a.state !== "Resolved");
     const shipment = alertItem && shipments.find(s => s.id === alertItem.id);
@@ -1716,18 +2064,19 @@ document.addEventListener("DOMContentLoaded", () => {
       cargo: s ? s.cargo : "",
       reason,
       notes,
-      requestedBy: currentUser ? `${currentUser.name} (Logistics Manager)` : "Logistics Manager",
+      requestedBy: currentUser ? `${currentUser.name} (${currentUser.role})` : "Logistics Manager",
       time: stamp(),
       state: "Pending"
     });
 
     closeModal("cancelRequestModal");
     saveState();
+    hasViewedCancels = false; // unread cancellation
     renderAll();
-    alert(`Cancellation request for consignment ${shipmentId} dispatched to Warehouse Operator (Sourabh) for terminal verification.`);
+    alert(`Cancellation request for consignment ${shipmentId} dispatched to Warehouse Operator for terminal verification.`);
   };
 
-  /* ---------- Register New Shipment ---------- */
+  /* ---------- Register New Shipment & Dual-Role Notification (Requirement 7) ---------- */
   const setupAddModal = () => {
     $("addShipmentForm").reset();
     $("addShipmentError").classList.add("d-none");
@@ -1742,6 +2091,9 @@ document.addEventListener("DOMContentLoaded", () => {
   $("addShipmentForm").onsubmit = (e) => {
     e.preventDefault();
     const id = $("newShipmentId").value.trim().toUpperCase();
+    const cargo = $("newCargo").value.trim();
+    const origin = $("newOrigin").value.trim();
+    const dest = $("newDest").value.trim();
     const min = parseFloat($("newMinTemp").value);
     const max = parseFloat($("newMaxTemp").value);
     const initialTemp = parseFloat($("newInitialTemp").value);
@@ -1761,19 +2113,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
     shipments.unshift({
       id,
-      cargo: $("newCargo").value.trim(),
-      origin: $("newOrigin").value.trim(),
-      dest: $("newDest").value.trim(),
+      cargo,
+      origin,
+      dest,
       min,
       max,
       status: "Active",
       readings: [{ temp: initialTemp, time: nowTime(), alertDeleted: false }]
     });
 
+    // Requirement 7: Dispatch notification to BOTH Warehouse Operator and Logistics Manager on their Alert section!
+    alerts.unshift({
+      aid: "NOTIF-NEW-" + (seq++),
+      id: id,
+      cargo: cargo,
+      type: "NewShipment",
+      status: "Normal",
+      state: "Active",
+      isNewShipment: true,
+      title: `New Consignment Dispatched: ${id}`,
+      message: `Consignment ${id} (${cargo}) on route ${origin} → ${dest} has been registered and activated. Both Logistics Manager and Warehouse Operator have been notified.`,
+      time: stamp(),
+      resolvedBy: `${currentUser ? currentUser.name : "Dispatch"} (${currentUser ? currentUser.role : "Command HQ"})`
+    });
+
+    hasViewedAlerts = false; // New unread notification for the Alert section!
+
     saveState();
     closeModal("addShipmentModal");
     $("addShipmentForm").reset();
     renderAll();
+    alert(`New consignment ${id} registered successfully! Notification sent to both Logistics and Warehouse Operator alert queues.`);
   };
 
   /* ---------- Mark Delivered (Operator Action) ---------- */
@@ -1849,7 +2219,6 @@ document.addEventListener("DOMContentLoaded", () => {
     $("modalSensorId").textContent = `SEN-IoT-${s.id.replace('SHP-', '')}`;
     $("addPingForm").classList.toggle("d-none", s.status !== "Active");
 
-    // Chronological Ping stream table
     $("modalHistoryList").innerHTML = s.readings.slice().reverse().map(r => {
       const cond = evaluateTemp(r.temp, s.min, s.max);
       const deltaText = cond.delta > 0 ? `+${cond.delta}°C breach` : "Within limits";
@@ -1863,9 +2232,7 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
     }).join("");
 
-    // Render detailed shipment chart
     renderShipmentDetailChart(s);
-
     openModal("detailsModal");
   };
 
@@ -1878,6 +2245,7 @@ document.addEventListener("DOMContentLoaded", () => {
       shipmentDetailChartInstance.destroy();
     }
 
+    const isDark = currentTheme === "dark";
     const labels = s.readings.map(r => r.time);
     const data = s.readings.map(r => r.temp);
     const minLine = s.readings.map(() => s.min);
@@ -1892,7 +2260,7 @@ document.addEventListener("DOMContentLoaded", () => {
             label: "Observed Temp (°C)",
             data,
             borderColor: "#3478F6",
-            backgroundColor: "rgba(52, 120, 246, 0.1)",
+            backgroundColor: "rgba(52, 120, 246, 0.15)",
             borderWidth: 2.5,
             tension: 0.2,
             pointRadius: 4,
@@ -1923,11 +2291,11 @@ document.addEventListener("DOMContentLoaded", () => {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: "top", labels: { font: { family: "Inter", size: 10 } } }
+          legend: { position: "top", labels: { font: { family: "Inter", size: 10 }, color: isDark ? "#94A3B8" : "#64748B" } }
         },
         scales: {
-          y: { grid: { color: "#F8FAFC" } },
-          x: { grid: { display: false } }
+          y: { grid: { color: isDark ? "#334155" : "#F8FAFC" }, ticks: { color: isDark ? "#94A3B8" : "#64748B" } },
+          x: { grid: { display: false }, ticks: { color: isDark ? "#94A3B8" : "#64748B" } }
         }
       }
     });

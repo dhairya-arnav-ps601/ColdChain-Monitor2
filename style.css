@@ -2,14 +2,14 @@
  * ===================================================================
  * COLDCHAIN MONITOR V2.0 — ENTERPRISE DESIGN SYSTEM (style.css)
  * Architecture: Clean CRM Dashboard Aesthetics, Deep Navy & Ice Blue
- * Tokens: Inter Typography, Slate Accents, Subtle Elevation, Restrained Status
+ * Tokens: Inter Typography, Light & Dark Theme Variables, Restrained Status
  * ===================================================================
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* Core Color Palette */
+  /* Core Color Palette (Light Theme Default) */
   --cc-navy: #17243A;
   --cc-navy-dark: #0F172A;
   --cc-navy-surface: #1E2E4A;
@@ -22,6 +22,8 @@
   --cc-bg-workspace: #F7F7F1;
   --cc-card-bg: #FFFFFF;
   --cc-surface-muted: #F8FAFC;
+  --cc-table-header: #F8FAFC;
+  --cc-table-row-hover: #F8FAFD;
   
   /* Typography Colors */
   --cc-text-main: #0F172A;
@@ -53,7 +55,6 @@
 
   /* Layout Measurements */
   --cc-sidebar-width: 260px;
-  --cc-sidebar-collapsed: 72px;
   --cc-topbar-height: 64px;
   
   /* Shadows & Radii */
@@ -68,6 +69,41 @@
   --cc-shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
 }
 
+/* ===================================================================
+   DARK THEME VARIABLE OVERRIDES
+   =================================================================== */
+[data-theme="dark"] {
+  --cc-bg-workspace: #0B1120;
+  --cc-card-bg: #1E293B;
+  --cc-surface-muted: #172338;
+  --cc-table-header: #1E293B;
+  --cc-table-row-hover: #26354A;
+  
+  --cc-text-main: #F8FAFC;
+  --cc-text-muted: #94A3B8;
+  --cc-text-subtle: #64748B;
+  --cc-text-inverse: #FFFFFF;
+  
+  --cc-border: #334155;
+  --cc-border-strong: #475569;
+  
+  --cc-normal-bg: #064E3B;
+  --cc-normal: #34D399;
+  --cc-normal-border: #059669;
+  
+  --cc-warning-bg: #78350F;
+  --cc-warning: #FBBF24;
+  --cc-warning-border: #D97706;
+  
+  --cc-critical-bg: #7F1D1D;
+  --cc-critical: #F87171;
+  --cc-critical-border: #DC2626;
+
+  --cc-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --cc-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.35);
+  --cc-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.45);
+}
+
 /* Base Document Setup */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -80,12 +116,13 @@ body {
   min-height: 100vh;
   margin: 0;
   padding: 0;
+  transition: background-color 0.2s ease, color 0.2s ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* ===================================================================
-   1. SPLIT-SCREEN AUTHENTICATION EXPERIENCE
+   1. SPLIT-SCREEN AUTHENTICATION & GOOGLE LOGIN
    =================================================================== */
 .login-split-wrapper {
   display: flex;
@@ -117,18 +154,6 @@ body {
   pointer-events: none;
 }
 
-.login-brand-side::after {
-  content: "";
-  position: absolute;
-  bottom: -15%;
-  left: -15%;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(23, 132, 93, 0.12) 0%, transparent 70%);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
 .login-form-side {
   flex: 1;
   display: flex;
@@ -148,19 +173,36 @@ body {
   padding: 2.5rem 2rem;
 }
 
-.quick-cred-chip {
-  background: var(--cc-surface-muted);
-  border: 1px solid var(--cc-border);
+/* Google Sign-in Button */
+.btn-google-sso {
+  background: #FFFFFF;
+  border: 1px solid #DADCE0;
+  color: #3C4043;
   border-radius: var(--cc-radius-sm);
-  padding: 0.5rem 0.75rem;
+  padding: 0.65rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
   cursor: pointer;
-  transition: all 0.15s ease;
-  font-size: 0.78rem;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.08);
 }
-.quick-cred-chip:hover {
-  background: var(--cc-blue-subtle);
-  border-color: var(--cc-blue-accent);
-  transform: translateY(-1px);
+
+.btn-google-sso:hover {
+  background: #F8FAFD;
+  border-color: #C2C7D0;
+  box-shadow: 0 1px 3px rgba(60, 64, 67, 0.2);
+  color: #202124;
+}
+
+[data-theme="dark"] .btn-google-sso {
+  background: #2D3748;
+  border-color: #4A5568;
+  color: #E2E8F0;
+}
+[data-theme="dark"] .btn-google-sso:hover {
+  background: #374151;
+  border-color: #64748B;
+  color: #FFFFFF;
 }
 
 /* ===================================================================
@@ -222,17 +264,6 @@ body {
   font-size: 1.05rem;
   letter-spacing: -0.01em;
   line-height: 1.2;
-}
-
-.sidebar-badge-v2 {
-  font-size: 0.62rem;
-  font-weight: 700;
-  padding: 0.15rem 0.45rem;
-  background: rgba(52, 120, 246, 0.2);
-  color: #93c5fd;
-  border-radius: 4px;
-  border: 1px solid rgba(147, 197, 253, 0.3);
-  text-transform: uppercase;
 }
 
 .sidebar-nav-container {
@@ -313,8 +344,8 @@ body {
 }
 
 .user-avatar-circle {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: var(--cc-blue-accent);
   color: white;
@@ -322,12 +353,20 @@ body {
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   box-shadow: 0 2px 6px rgba(52, 120, 246, 0.4);
+  object-fit: cover;
+  overflow: hidden;
+}
+
+.user-avatar-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* ===================================================================
-   3. MAIN WORKSPACE & TOP HEADER BAR
+   3. MAIN WORKSPACE & TOPBAR
    =================================================================== */
 .app-main {
   flex: 1;
@@ -350,48 +389,30 @@ body {
   z-index: 1020;
 }
 
-.simulation-indicator-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.75rem;
-  background: #f1f5f9;
-  border: 1px solid var(--cc-border);
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--cc-text-muted);
-}
-
-.status-dot-pulse {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #10B981;
-  position: relative;
-}
-
-.status-dot-pulse::after {
-  content: "";
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: rgba(16, 185, 129, 0.4);
-  animation: pulse 1.8s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(0.9); opacity: 0.8; }
-  50% { transform: scale(1.6); opacity: 0; }
-  100% { transform: scale(0.9); opacity: 0; }
-}
-
 .workspace-content {
   padding: 1.75rem 2rem;
   flex: 1;
+}
+
+/* Theme Toggle Button */
+.btn-theme-toggle {
+  background: transparent;
+  border: 1px solid var(--cc-border);
+  color: var(--cc-text-muted);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--cc-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-theme-toggle:hover {
+  background: var(--cc-surface-muted);
+  color: var(--cc-text-main);
+  border-color: var(--cc-border-strong);
 }
 
 /* ===================================================================
@@ -474,16 +495,6 @@ body {
   letter-spacing: -0.02em;
 }
 
-.kpi-badge-trend {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-}
-
 /* ===================================================================
    5. DATA TABLES & STATUS BADGES
    =================================================================== */
@@ -494,7 +505,7 @@ body {
 }
 
 .crm-table thead th {
-  background: #F8FAFC;
+  background: var(--cc-table-header);
   color: var(--cc-text-muted);
   font-size: 0.75rem;
   font-weight: 700;
@@ -511,12 +522,12 @@ body {
   color: var(--cc-text-main);
   font-size: 0.86rem;
   vertical-align: middle;
-  background: #FFFFFF;
+  background: var(--cc-card-bg);
   transition: background 0.12s ease;
 }
 
 .crm-table tbody tr:hover td {
-  background: #F8FAFD;
+  background: var(--cc-table-row-hover);
 }
 
 .crm-table tbody tr:last-child td {
@@ -565,11 +576,33 @@ body {
   border: 1px solid #CBD5E1;
 }
 
+.status-pill-Spoiled {
+  background: #FEF2F2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+}
+
+[data-theme="dark"] .status-pill-Delivered {
+  background: #064E3B;
+  color: #34D399;
+  border-color: #059669;
+}
+[data-theme="dark"] .status-pill-Cancelled {
+  background: #334155;
+  color: #94A3B8;
+  border-color: #475569;
+}
+[data-theme="dark"] .status-pill-Spoiled {
+  background: #7F1D1D;
+  color: #F87171;
+  border-color: #DC2626;
+}
+
 /* ===================================================================
-   6. ALERTS & APPROVAL CARDS
+   6. ALERTS & NOTIFICATION CARDS
    =================================================================== */
 .alert-card-v2 {
-  background: #FFFFFF;
+  background: var(--cc-card-bg);
   border: 1px solid var(--cc-border);
   border-left-width: 4px;
   border-radius: var(--cc-radius-md);
@@ -586,18 +619,19 @@ body {
 
 .alert-card-v2.Critical {
   border-left-color: var(--cc-critical);
-  background-color: #FFFBFB;
 }
 
 .alert-card-v2.Warning {
   border-left-color: var(--cc-warning);
-  background-color: #FFFDF5;
 }
 
 .alert-card-v2.Resolved {
   border-left-color: var(--cc-text-subtle);
-  background-color: #F8FAFC;
   opacity: 0.8;
+}
+
+.alert-card-v2.NewShipment {
+  border-left-color: var(--cc-blue-accent);
 }
 
 .alert-card-v2.Cancellation {
@@ -606,7 +640,7 @@ body {
 
 /* Device Health Widget */
 .device-card-v2 {
-  background: #FFFFFF;
+  background: var(--cc-card-bg);
   border: 1px solid var(--cc-border);
   border-radius: var(--cc-radius-md);
   padding: 1.15rem;
@@ -617,7 +651,7 @@ body {
 .device-signal-bar {
   height: 6px;
   border-radius: 3px;
-  background: #E2E8F0;
+  background: var(--cc-border);
   overflow: hidden;
 }
 
@@ -668,7 +702,7 @@ body {
 }
 
 .btn-crm-outline:hover {
-  background-color: #F8FAFC;
+  background-color: var(--cc-surface-muted);
   color: var(--cc-text-main);
   border-color: var(--cc-border-strong);
 }
@@ -678,6 +712,7 @@ body {
   border-radius: var(--cc-radius-sm);
   font-size: 0.86rem;
   color: var(--cc-text-main);
+  background-color: var(--cc-card-bg);
   padding: 0.5rem 0.75rem;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -685,13 +720,23 @@ body {
 .form-control:focus, .form-select:focus {
   border-color: var(--cc-blue-accent);
   box-shadow: 0 0 0 3px rgba(52, 120, 246, 0.15);
+  background-color: var(--cc-card-bg);
+  color: var(--cc-text-main);
   outline: none;
+}
+
+[data-theme="dark"] .form-control, [data-theme="dark"] .form-select {
+  background-color: #1E293B;
+  color: #F8FAFC;
+  border-color: #334155;
 }
 
 /* Modal Polish */
 .modal-content {
   border-radius: var(--cc-radius-lg);
   border: 1px solid var(--cc-border);
+  background: var(--cc-card-bg);
+  color: var(--cc-text-main);
   box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
   overflow: hidden;
 }
@@ -708,7 +753,46 @@ body {
 .modal-footer {
   border-top: 1px solid var(--cc-border);
   padding: 1rem 1.5rem;
-  background: #F8FAFC;
+  background: var(--cc-surface-muted);
+}
+
+/* Responsive Profile Photo Editor */
+.profile-avatar-edit-container {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1rem;
+}
+
+.profile-avatar-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--cc-blue-accent);
+  box-shadow: 0 4px 10px rgba(52, 120, 246, 0.25);
+}
+
+.profile-avatar-edit-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--cc-blue-accent);
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid var(--cc-card-bg);
+  transition: all 0.15s ease;
+}
+
+.profile-avatar-edit-btn:hover {
+  background: var(--cc-blue-hover);
+  transform: scale(1.1);
 }
 
 /* ===================================================================
